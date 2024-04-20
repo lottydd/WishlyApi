@@ -31,4 +31,8 @@ public class WishlistEntity {
             joinColumns = @JoinColumn(name = "wishlist_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id"))
     private List<ItemEntity> items;
+
+    @Column(name = "item_count")
+    private int itemCount; // Количество элементов в списке желаний
+
 }

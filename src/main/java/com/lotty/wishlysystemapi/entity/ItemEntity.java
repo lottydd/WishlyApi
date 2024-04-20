@@ -23,4 +23,7 @@ public class ItemEntity {
     private String imageUrl;
 
     private int quantity;
+
+    @Column(name = "item_link")
+    private String link;
     }

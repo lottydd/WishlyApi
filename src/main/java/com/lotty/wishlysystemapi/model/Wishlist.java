@@ -15,5 +15,6 @@ public class Wishlist {
     private List<Item> items;
     private String description;
     private String type;
-    private String imageUrl; // Ссылка на изображение списка желаемых товаров
+    private String imageUrl;
+    private int itemCount;
 }

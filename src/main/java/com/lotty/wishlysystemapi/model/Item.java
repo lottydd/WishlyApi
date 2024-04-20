@@ -12,6 +12,7 @@ public class Item {
     private String name;
     private String description;
     private double price;
-    private String imageUrl;
-    private int quantity;
+    private String imageUrl; // Ссылка на изображение товара
+    private int quantity; // Количество товара в наличии
+    private String link; // Ссылка на товар
 }
