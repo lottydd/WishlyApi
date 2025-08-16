@@ -1,7 +1,6 @@
 package com.lotty.wishlysystemapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,12 +11,22 @@ import lombok.NoArgsConstructor;
 @Table(name = "Items")
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Лучше явно указать стратегию
     private Integer itemId;
-    private String name;
+
+    @Column(nullable = false)
+    private String itemName;
+
     private String description;
+
+    @Column(nullable = false)
     private double price;
-    private String imageUrl; // Ссылка на изображение товара
-    private String link; // Ссылка на товар
+
+    @Column(nullable = false, unique = true)
+    private String imageURL;
+
+    @Column(nullable = false, unique = true)
+    private String sourceURL;
 }
