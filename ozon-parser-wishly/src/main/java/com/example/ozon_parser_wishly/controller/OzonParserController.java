@@ -5,18 +5,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/ozon")
-public class OzonController {
+public class OzonParserController {
 
     private final OzonParserService parserService;
 
-    public OzonController(OzonParserService parserService) {
+    public OzonParserController(OzonParserService parserService) {
         this.parserService = parserService;
     }
 
     @GetMapping("/parse")
-    public Map<String, String> parse(@RequestParam String url) {
+    public Map<String, Object> parse(@RequestParam String url) {
         return parserService.parseProduct(url);
     }
 }
