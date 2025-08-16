@@ -2,7 +2,6 @@ package com.lotty.wishlysystemapi.service;
 
 import com.lotty.wishlysystemapi.entity.ItemEntity;
 import com.lotty.wishlysystemapi.model.Item;
-import com.lotty.wishlysystemapi.repository.ItemRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
