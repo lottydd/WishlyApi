@@ -2,7 +2,6 @@ package com.lotty.wishlysystemapi.service;
 
 import com.lotty.wishlysystemapi.entity.UserEntity;
 import com.lotty.wishlysystemapi.model.User;
-import com.lotty.wishlysystemapi.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

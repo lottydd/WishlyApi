@@ -1,18 +1,23 @@
 package com.lotty.wishlysystemapi.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+@Entity
 @Data
+@Table(name = "Items")
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Item {
-    private Long id;
+    private Integer itemId;
     private String name;
     private String description;
     private double price;
     private String imageUrl; // Ссылка на изображение товара
-    private int quantity; // Количество товара в наличии
     private String link; // Ссылка на товар
 }
