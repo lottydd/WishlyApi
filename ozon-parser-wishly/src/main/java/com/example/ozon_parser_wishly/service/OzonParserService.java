@@ -227,10 +227,6 @@ public class OzonParserService {
         return null;
     }
 
-
-
-
-
     private List<String> getAllImages(WebDriver driver, WebDriverWait wait) {
         List<String> images = new ArrayList<>();
 

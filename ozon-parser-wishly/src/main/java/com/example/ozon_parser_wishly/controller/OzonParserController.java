@@ -4,10 +4,10 @@ import com.example.ozon_parser_wishly.service.OzonParserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
+import java.util.Objects;
 
 @RestController
-@RequestMapping("/ozon")
+@RequestMapping("/api/ozon")
 public class OzonParserController {
 
     private final OzonParserService parserService;
