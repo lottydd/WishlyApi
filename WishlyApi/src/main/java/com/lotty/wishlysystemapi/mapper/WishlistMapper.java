@@ -18,4 +18,5 @@ public interface WishlistMapper {
     @Mapping(target = "modifiedDate", expression = "java(java.time.LocalDateTime.now())")
     Wishlist toEntity (WishlistCreateDTO dto);
 
+    Wishlist toDTO(Wishlist wishlist);
 }

@@ -30,7 +30,7 @@ public class WishlistController {
     @PatchMapping("/{id}/description")
     @Operation(summary = "Изменить описание вишлиста")
     public ResponseEntity<Wishlist> updateDescription(@PathVariable Integer id, @RequestParam String description) {
-        return ResponseEntity.ok(wishlistService.updateDescription(id, description));
+        return ResponseEntity.ok(wishlistService.updateWishlist(id, description));
     }
 
     @GetMapping("/{id}/items")
