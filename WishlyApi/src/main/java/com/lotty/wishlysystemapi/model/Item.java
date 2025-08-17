@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Item {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Лучше явно указать стратегию
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer itemId;
 
     @Column(nullable = false)
@@ -29,4 +29,8 @@ public class Item {
 
     @Column(nullable = false, unique = true)
     private String sourceURL;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_list_id", nullable = false)
+    private ItemList itemList;
 }
