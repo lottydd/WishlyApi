@@ -1,5 +1,6 @@
 package com.lotty.wishlysystemapi.controller;
 
+import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistCreateDTO;
 import com.lotty.wishlysystemapi.model.Item;
 import com.lotty.wishlysystemapi.model.Wishlist;
 import com.lotty.wishlysystemapi.service.WishlistService;
@@ -22,8 +23,8 @@ public class WishlistController {
 
     @PostMapping
     @Operation(summary = "Создать новый вишлист")
-    public ResponseEntity<Wishlist> createWishlist(@RequestBody Wishlist wishlist) {
-        return ResponseEntity.ok(wishlistService.createWishlist(wishlist));
+    public ResponseEntity<Wishlist> createWishlist(@RequestBody WishlistCreateDTO dto) {
+        return ResponseEntity.ok(wishlistService.createWishlist(dto));
     }
 
     @PatchMapping("/{id}/description")

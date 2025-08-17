@@ -35,10 +35,10 @@ public class Wishlist {
             joinColumns = @JoinColumn(name = "wishlist_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id")
     )
-    private List<Item> itemList = new ArrayList<>();
+    private List<Item> wishlistItems = new ArrayList<>();
 
     @Column(nullable = false)
-    private int itemCount;
+    private int itemCount = 0;
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;

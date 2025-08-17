@@ -1,5 +1,6 @@
 package com.lotty.wishlysystemapi.controller;
 
+import com.lotty.wishlysystemapi.dto.request.user.UserCreateDTO;
 import com.lotty.wishlysystemapi.model.User;
 import com.lotty.wishlysystemapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +21,8 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Создать нового пользователя")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
+    public ResponseEntity<User> createUser(@RequestBody UserCreateDTO dto) {
+        return ResponseEntity.ok(userService.createUser(dto));
     }
 
     @PatchMapping("/{id}/email")
