@@ -1,6 +1,9 @@
 package com.lotty.wishlysystemapi.controller;
 
 import com.lotty.wishlysystemapi.model.User;
+import com.lotty.wishlysystemapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,42 +11,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "Операции с пользователями")
 public class UserController {
 
     private final UserService userService;
-
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    public UserController(UserService userService) { this.userService = userService; }
 
     @PostMapping
+    @Operation(summary = "Создать нового пользователя")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+        return ResponseEntity.ok(userService.createUser(user));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    @PatchMapping("/{id}/email")
+    @Operation(summary = "Изменить email пользователя")
+    public ResponseEntity<User> updateEmail(@PathVariable Integer id, @RequestParam String email) {
+        return ResponseEntity.ok(userService.updateEmail(id, email));
     }
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    @PatchMapping("/{id}/description")
+    @Operation(summary = "Изменить описание пользователя")
+    public ResponseEntity<User> updateDescription(@PathVariable Integer id, @RequestParam String description) {
+        return ResponseEntity.ok(userService.updateDescription(id, description));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User updatedUser = userService.updateUser(id, user);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/password")
+    @Operation(summary = "Изменить пароль пользователя")
+    public ResponseEntity<User> updatePassword(@PathVariable Integer id, @RequestParam String password) {
+        return ResponseEntity.ok(userService.updatePassword(id, password));
     }
 }

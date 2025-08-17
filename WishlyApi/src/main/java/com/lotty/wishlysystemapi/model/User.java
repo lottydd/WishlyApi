@@ -41,6 +41,9 @@ public class User {
     )
     private List<Role> roles = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ItemList itemList;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Wishlist> wishlists = new ArrayList<>();
 }

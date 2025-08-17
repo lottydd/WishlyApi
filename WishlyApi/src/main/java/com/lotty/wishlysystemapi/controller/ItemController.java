@@ -1,6 +1,7 @@
 package com.lotty.wishlysystemapi.controller;
 
 import com.lotty.wishlysystemapi.model.Item;
+import com.lotty.wishlysystemapi.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/api/item")
 public class ItemController {
 
     private final ItemService itemService;
