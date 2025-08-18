@@ -9,94 +9,122 @@ import com.lotty.wishlysystemapi.model.Item;
 import com.lotty.wishlysystemapi.model.User;
 import com.lotty.wishlysystemapi.model.Wishlist;
 import com.lotty.wishlysystemapi.repository.ItemDAO;
-import com.lotty.wishlysystemapi.repository.ItemListDAO;
 import com.lotty.wishlysystemapi.repository.UserDAO;
 import com.lotty.wishlysystemapi.repository.WishlistDAO;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-
 public class WishlistService {
-
     private static final Logger logger = LoggerFactory.getLogger(WishlistService.class);
-
-
-    private final ItemService itemService;
     private final WishlistMapper wishlistMapper;
     private final UserDAO userDAO;
     private final WishlistDAO wishlistDAO;
     private final ItemDAO itemDAO;
-    private final ItemListService itemListService;
 
-    public WishlistService(ItemService itemService, WishlistMapper wishlistMapper, UserDAO userDAO, WishlistDAO wishlistDAO, ItemDAO itemDAO, ItemListService itemListService) {
-        this.itemService = itemService;
+    public WishlistService(WishlistMapper wishlistMapper, UserDAO userDAO,
+                           WishlistDAO wishlistDAO, ItemDAO itemDAO) {
         this.wishlistMapper = wishlistMapper;
         this.userDAO = userDAO;
         this.wishlistDAO = wishlistDAO;
         this.itemDAO = itemDAO;
-        this.itemListService = itemListService;
     }
 
+    @Transactional
     public Wishlist createWishlist(WishlistCreateDTO dto) {
-        logger.info("Попытка создания нового вишлиста");
         User user = userDAO.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         Wishlist wishlist = wishlistMapper.toEntity(dto);
         wishlist.setUser(user);
+        wishlist.setCreateDate(LocalDateTime.now());
+        wishlist.setModifiedDate(LocalDateTime.now());
+
         return wishlistDAO.save(wishlist);
     }
 
-    public Wishlist addItem(AddItemToWishlistDTO dto) {
-        logger.info("Попытка добавления новой вещи в вишлист");
-        Item item = itemService.createItem(dto);
-        Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId()).orElseThrow();
+    @Transactional
+    public Wishlist addExistingItemToWishlist(Integer wishlistId, Integer itemId) {
+        Wishlist wishlist = wishlistDAO.findById(wishlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        Item item = itemDAO.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+
+        if (!wishlist.getWishlistItems().contains(item)) {
+            wishlist.getWishlistItems().add(item);
+            wishlist.setModifiedDate(LocalDateTime.now());
+            wishlistDAO.save(wishlist);
+        }
+
+        return wishlist;
+    }
+
+    @Transactional
+    public Wishlist createAndAddItemToWishlist(Integer wishlistId, AddItemToWishlistDTO dto) {
+        Wishlist wishlist = wishlistDAO.findById(wishlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        Item item = itemMapper.toEntity(dto);
+        item.setOwner(wishlist.getUser());
+        item = itemDAO.save(item);
+
         wishlist.getWishlistItems().add(item);
-        wishlistDAO.save(wishlist);
-        return wishlistMapper.toDTO(wishlist);
-    }
-
-    public Wishlist getWishlistById(Integer id) {
-        return wishlistDAO.findById(id).orElseThrow();
-    }
-
-    public List<Wishlist> getAllWishlists(Integer id) {
-        logger.info("Попытка получить все вишлисты пользователя");
-
-        return wishlistDAO.findAllByUserID(id);
-    }
-
-    public Wishlist updateWishlist(WishlistUpdateDTO wishlistUpdateDTO) {
-        logger.info("Попытка обновления данных вишлиста");
-        Wishlist wishlist = wishlistDAO.findById(wishlistUpdateDTO.getWishlistId()).orElseThrow();
-
-        //нужна проверка на empty если нет то тогда выполняем
-        wishlist.setDescription(wishlistUpdateDTO.getWishlistDescription());
-        wishlist.setWishlistName(wishlistUpdateDTO.getWishlistName());
         wishlist.setModifiedDate(LocalDateTime.now());
         return wishlistDAO.save(wishlist);
     }
 
-    public void deleteWishlist(Integer id) {
-        logger.info("Попытка удаления вишлиста");
-        wishlistDAO.delete(id);
+    @Transactional(readOnly = true)
+    public Wishlist getWishlistById(Integer id) {
+        return wishlistDAO.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
     }
 
-    public Wishlist removeItem(RemoveItemDTO dto) {
-        logger.info("Попытка удаления вещи из вишлиста");
-        Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId()).orElseThrow();
-        wishlist.getWishlistItems().remove(itemDAO.findById(dto.getItemId()).orElseThrow());
-        itemListService.removeItemById(dto.getUserId(), dto.getItemId());
+    @Transactional(readOnly = true)
+    public List<Wishlist> getUserWishlists(Integer userId) {
+        return wishlistDAO.findAllByUserId(userId);
+    }
+
+    @Transactional
+    public Wishlist updateWishlist(WishlistUpdateDTO dto) {
+        Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId())
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        wishlist.setWishlistName(dto.getWishlistName());
+        wishlist.setDescription(dto.getWishlistDescription());
+        wishlist.setModifiedDate(LocalDateTime.now());
+
         return wishlistDAO.save(wishlist);
     }
 
-    public List<Item> getItems(Integer id) {
-        logger.info("Попытка получения всех вещей из вишлиста");
-        Wishlist wishlist = wishlistDAO.findById(id).orElseThrow();
-        return wishlist.getWishlistItems();
+    @Transactional
+    public void deleteWishlist(Integer wishlistId) {
+        wishlistDAO.delete(wishlistId);
+    }
+
+    @Transactional
+    public void removeItemFromWishlist(Integer wishlistId, Integer itemId) {
+        Wishlist wishlist = wishlistDAO.findById(wishlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        Item item = itemDAO.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+
+        wishlist.getWishlistItems().remove(item);
+        wishlist.setModifiedDate(LocalDateTime.now());
+        wishlistDAO.save(wishlist);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Item> getWishlistItems(Integer wishlistId) {
+        return wishlistDAO.findById(wishlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"))
+                .getWishlistItems();
     }
 }

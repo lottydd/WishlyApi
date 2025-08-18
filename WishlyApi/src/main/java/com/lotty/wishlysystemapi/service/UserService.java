@@ -4,6 +4,7 @@ import com.lotty.wishlysystemapi.dto.request.RequestIdDTO;
 import com.lotty.wishlysystemapi.dto.request.user.UserCreateDTO;
 import com.lotty.wishlysystemapi.dto.request.user.UserUpdateDTO;
 import com.lotty.wishlysystemapi.mapper.UserMapper;
+import com.lotty.wishlysystemapi.model.Item;
 import com.lotty.wishlysystemapi.model.Role;
 import com.lotty.wishlysystemapi.model.User;
 import com.lotty.wishlysystemapi.repository.RoleDAO;
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 
@@ -185,5 +188,11 @@ public class UserService {
                 .anyMatch(existingRole -> existingRole.getRoleName().equalsIgnoreCase(roleName));
     }
 
-
+    @Transactional(readOnly = true)
+    public List<Item> getUserItems(Integer userId) {
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return user.getOwnedItems();
+    }
 }
+

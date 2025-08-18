@@ -17,4 +17,5 @@ public class UpdateItemDTO {
     private String itemName;
     private String sourceURL;
     private Double price;
+    private String imageURL;
 }

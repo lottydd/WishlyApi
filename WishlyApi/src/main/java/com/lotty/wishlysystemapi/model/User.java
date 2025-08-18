@@ -10,14 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "Users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "whishlists")
-@Table(name = "Users")
-
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
@@ -41,9 +38,9 @@ public class User {
     )
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ItemList itemList;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Wishlist> wishlists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
+    private List<Item> ownedItems = new ArrayList<>();
 }

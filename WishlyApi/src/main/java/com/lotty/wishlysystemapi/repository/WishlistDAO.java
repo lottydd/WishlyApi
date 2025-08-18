@@ -18,4 +18,8 @@ public class WishlistDAO extends BaseDAO<Wishlist, Integer>{
 
     public List<Wishlist> findAllByUserID(Integer id) {
     }
+
+    public List<Wishlist> findAllByUserId(Integer userId) {
+    }
+
 }

@@ -5,10 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
-@Data
 @Table(name = "Items")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Item {
@@ -24,13 +27,16 @@ public class Item {
     @Column(nullable = false)
     private double price;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String imageURL;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String sourceURL;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_list_id", nullable = false)
-    private ItemList itemList;
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @ManyToMany(mappedBy = "wishlistItems")
+    private List<Wishlist> inWishlists = new ArrayList<>();
 }

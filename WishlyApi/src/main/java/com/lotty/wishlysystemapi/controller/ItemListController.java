@@ -1,12 +1,7 @@
 package com.lotty.wishlysystemapi.controller;
 
 
-import com.lotty.wishlysystemapi.model.Item;
-import com.lotty.wishlysystemapi.model.User;
 import com.lotty.wishlysystemapi.model.Wishlist;
-import com.lotty.wishlysystemapi.service.ItemListService;
-import com.lotty.wishlysystemapi.service.ItemService;
-import com.lotty.wishlysystemapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
