@@ -22,4 +22,9 @@ public class WishlistDAO extends BaseDAO<Wishlist, Integer>{
     public List<Wishlist> findAllByUserId(Integer userId) {
     }
 
+    public boolean existsById(Integer wishlistId) {
+    }
+
+    public List<Wishlist> findAllByItemId(Integer itemId) {
+    }
 }

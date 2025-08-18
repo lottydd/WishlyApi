@@ -6,13 +6,17 @@ import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.mapper.ItemMapper;
 import com.lotty.wishlysystemapi.model.Item;
 import com.lotty.wishlysystemapi.model.User;
+import com.lotty.wishlysystemapi.model.Wishlist;
 import com.lotty.wishlysystemapi.repository.ItemDAO;
 import com.lotty.wishlysystemapi.repository.UserDAO;
+import com.lotty.wishlysystemapi.repository.WishlistDAO;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ItemService {
@@ -20,19 +24,20 @@ public class ItemService {
     private final ItemMapper itemMapper;
     private final ItemDAO itemDAO;
     private final UserDAO userDAO;
+    private final WishlistDAO wishlistDAO;
 
-    public ItemService(ItemMapper itemMapper, ItemDAO itemDAO, UserDAO userDAO) {
+    public ItemService(ItemMapper itemMapper, ItemDAO itemDAO, UserDAO userDAO, WishlistDAO wishlistDAO) {
         this.itemMapper = itemMapper;
         this.itemDAO = itemDAO;
         this.userDAO = userDAO;
+        this.wishlistDAO = wishlistDAO;
     }
 
     @Transactional
     public Item createItem(AddItemToWishlistDTO dto) {
-        logger.info("Creating new item for user: {}", dto.getUserId());
+        logger.info("Создание нового айтема для Пользователя: {}", dto.getUserId());
         User owner = userDAO.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
         Item item = itemMapper.toEntity(dto);
         item.setOwner(owner);
         return itemDAO.save(item);
@@ -41,14 +46,15 @@ public class ItemService {
     @Transactional(readOnly = true)
     public Item getItemById(Integer itemId) {
         return itemDAO.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
     }
 
     @Transactional
     public Item updateItem(UpdateItemDTO dto) {
         Item item = itemDAO.findById(dto.getItemId())
-                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
 
+        //нужен маппер скорее всего
         item.setDescription(dto.getDescription());
         item.setPrice(dto.getPrice());
         item.setItemName(dto.getItemName());
@@ -57,16 +63,30 @@ public class ItemService {
 
         return itemDAO.save(item);
     }
-
     @Transactional
     public void deleteItem(Integer itemId) {
+        // 1. Находим айтем
         Item item = itemDAO.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+                .orElseThrow(() -> {
+                    logger.error("Айтем с ID {} не найден", itemId);
+                    return new EntityNotFoundException("Айтем не найден");
+                });
 
-        logger.info("Deleting item with ID: {}", itemId);
-        itemDAO.delete(item);
+        logger.info("Начат процесс удаления айтема с ID: {}", itemId);
+
+        // 2. Удаляем айтем из всех вишлистов (если используется связь ManyToMany)
+        List<Wishlist> wishlistsWithItem = wishlistDAO.findAllByItemId(itemId);
+        for (Wishlist wishlist : wishlistsWithItem) {
+            wishlist.getWishlistItems().remove(item);
+            wishlistDAO.save(wishlist);
+            logger.debug("Айтем удален из вишлиста ID: {}", wishlist.getWishlistId());
+        }
+
+        // 3. Удаляем сам айтем
+        itemDAO.delete(item.getItemId());
+        logger.info("Айтем с ID {} полностью удален", itemId);
     }
-
+    
     @Transactional(readOnly = true)
     public List<Item> getUserItems(Integer userId) {
         return itemDAO.findAllByOwnerId(userId);

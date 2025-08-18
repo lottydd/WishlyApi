@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class ItemDAO  extends BaseDAO<Item, Integer>{
 
@@ -16,4 +18,6 @@ public class ItemDAO  extends BaseDAO<Item, Integer>{
         super(Item.class);
     }
 
+    public List<Item> findAllByOwnerId(Integer userId) {
+    }
 }

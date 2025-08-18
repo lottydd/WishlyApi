@@ -20,7 +20,7 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
+    public ResponseEntity<Item> getItemById(@PathVariable Integer id) {
         Item item = itemService.getItemById(id);
         return ResponseEntity.ok(item);
     }
@@ -38,7 +38,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteItem(@PathVariable Integer id) {
         itemService.deleteItem(id);
         return ResponseEntity.noContent().build();
     }
