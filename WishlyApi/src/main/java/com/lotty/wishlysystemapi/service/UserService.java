@@ -1,15 +1,19 @@
 package com.lotty.wishlysystemapi.service;
 
+import com.lotty.wishlysystemapi.dto.request.RequestIdDTO;
 import com.lotty.wishlysystemapi.dto.request.user.UserCreateDTO;
+import com.lotty.wishlysystemapi.dto.request.user.UserUpdateDTO;
 import com.lotty.wishlysystemapi.mapper.UserMapper;
+import com.lotty.wishlysystemapi.model.Role;
 import com.lotty.wishlysystemapi.model.User;
+import com.lotty.wishlysystemapi.repository.RoleDAO;
 import com.lotty.wishlysystemapi.repository.UserDAO;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 
@@ -18,12 +22,14 @@ public class UserService {
 
     private final UserDAO userDAO;
     private final UserMapper userMapper;
+    private final RoleDAO roleDAO;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public UserService(UserDAO userDAO, UserMapper userMapper) {
+    public UserService(UserDAO userDAO, UserMapper userMapper, RoleDAO roleDAO) {
         this.userDAO = userDAO;
         this.userMapper = userMapper;
+        this.roleDAO = roleDAO;
     }
 
 
@@ -38,30 +44,125 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
-    private void assignRoleToUser(Integer userId, String roleUser) {
+    @Transactional
+    public User assignRoleToUser(int userId, String roleName) {
+        logger.info("Попытка назначения роли пользователю. UserID: {}, Role: {}", userId, roleName);
+
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> {
+                    logger.error("Пользователь не найден. UserID: {}", userId);
+                    return new EntityNotFoundException("User not found");
+                });
+
+        Role role = roleDAO.findRoleName(roleName)
+                .orElseThrow(() -> {
+                    logger.error("Роль не найдена. Role: {}", roleName);
+                    return new EntityNotFoundException("Role not found " + roleName);
+                });
+
+        if (validationRoleDuplication(user, role.getRoleName())) {
+            logger.error("Пользователь уже имеет роль. UserID: {}, Role: {}", userId, roleName);
+            throw new IllegalArgumentException("Пользователь уже имеет такую роль");
+        }
+        user.getRoles().add(role);
+        userDAO.save(user);
+        logger.info("Роль успешно назначена. UserID: {}, Role: {}", userId, roleName);
+        return userMapper.toDto(user);
     }
 
-    public User getUserById(Long id) {
+    @Transactional(readOnly = true)
+    public User findUserById(RequestIdDTO dto) {
+        logger.info("Поиск пользователя по ID. UserID: {}", dto.getId());
+
+        return userMapper.toDto(userDAO.findById(dto.getId())
+                .orElseThrow(() -> {
+                    logger.error("Пользователь не найден.   UserID: {}", dto.getId());
+                    return new EntityNotFoundException("User not found");
+                }));
     }
 
-    public List<User> getAllUsers() {
+    @Transactional
+    public User deleteRoleFromUser(int userId, String roleName) {
+        logger.info("Попытка удаления роли у пользователя. UserID: {}, Role: {}", userId, roleName);
+
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> {
+                    logger.error("Пользователь не найден. UserID: {}", userId);
+                    return new EntityNotFoundException("User not found");
+                });
+
+        Role role = roleDAO.findRoleName(roleName)
+                .orElseThrow(() -> {
+                    logger.error("Роль не найдена. Role: {}", roleName);
+                    return new EntityNotFoundException("Role not found");
+                });
+
+        if (!user.getRoles().contains(role)) {
+            logger.error("У пользователя нет такой роли. UserID: {}, Role: {}", userId, roleName);
+            throw new IllegalArgumentException("У пользователя нет такой роли");
+        }
+
+        user.getRoles().remove(role);
+        logger.info("Роль удалена у пользователя. UserID: {}, Role: {}", userId, roleName);
+
+        return userMapper.toDto(user);
     }
 
-    public User updateEmail(Integer id, String email) {
+    @Transactional
+    public void changePassword(int userId, String newPassword) {
+        logger.info("Попытка смены пароля пользователя");
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        logger.info("Пользователь с ID {} найден", user.getUserId());
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userDAO.update(user);
     }
 
-    public User updateDescription(Integer id, String description) {
+    @Transactional
+    public User updateUser(int userId, UserUpdateDTO userUpdateDTO) {
+        logger.info("Попытка обновления пользователя. UserID: {}", userId);
+
+        validateUpdateData(userUpdateDTO, userId);
+
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> {
+                    logger.error("Пользователь не найден. UserID: {}", userId);
+                    return new EntityNotFoundException("Пользователь не найден");
+                });
+
+        userMapper.updateFromDto(userUpdateDTO, user);
+
+        User updatedUser = userDAO.save(user);
+
+        logger.info("Данные пользователя обновлены. UserID: {}", userId);
+        return userMapper.toDto(updatedUser);
     }
 
-    public User updatePassword(Integer id, String password) {
-    }
+    @Transactional(readOnly = true)
+    private void validateUpdateData(UserUpdateDTO dto, Integer currentUserId) {
+        logger.info("Валидация данных обновления пользователя. UserID: {}", currentUserId);
+        if (dto == null) {
+            logger.error("Попытка обновления с null данными");
+            throw new IllegalArgumentException("Попытка обновления с null данными");
+        }
 
-    public User addRole(Integer userId, String admin) {
-    }
+        userDAO.findByEmail(dto.getEmail())
+                .filter(user -> !user.getUserId().equals(currentUserId))
+                .ifPresent(user -> {
+                    logger.error("Попытка обновления на занятый email. Email: {}, CurrentUserID: {}",
+                            dto.getEmail(), currentUserId);
+                    throw new IllegalArgumentException("Email " + dto.getEmail() + " уже занят другим пользователем");
+                });
 
-    public User removeRole(Integer userId, String admin) {
+        userDAO.findByUsername(dto.getUsername())
+                .filter(user -> !user.getUserId().equals(currentUserId))
+                .ifPresent(user -> {
+                    logger.error("Попытка обновления на занятый username. Username: {}, CurrentUserID: {}",
+                            dto.getUsername(), currentUserId);
+                    throw new IllegalArgumentException("Username " + dto.getUsername() + " уже занят другим пользователем");
+                });
+        logger.info("Данные обновления валидны");
     }
-
 
     @Transactional(readOnly = true)
     private void validateRegistrationData(UserCreateDTO dto) {
@@ -78,5 +179,11 @@ public class UserService {
         }
         logger.info("Данные регистрации валидны");
     }
+
+    private boolean validationRoleDuplication(User user, String roleName) {
+        return user.getRoles().stream()
+                .anyMatch(existingRole -> existingRole.getRoleName().equalsIgnoreCase(roleName));
+    }
+
 
 }

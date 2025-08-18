@@ -12,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Schema(description = "Запрос для удаления вещи из вишлиста")
 public class RemoveItemDTO {
+    private Integer userId;
     private Integer wishlistId;
     private Integer itemId;
 }

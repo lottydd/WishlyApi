@@ -90,7 +90,7 @@ public class WishlistService {
         logger.info("Попытка удаления вещи из вишлиста");
         Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId()).orElseThrow();
         wishlist.getWishlistItems().remove(itemDAO.findById(dto.getItemId()).orElseThrow());
-        itemListService.removeItemById();
+        itemListService.removeItemById(dto.getUserId(), dto.getItemId());
         return wishlistDAO.save(wishlist);
     }
 
