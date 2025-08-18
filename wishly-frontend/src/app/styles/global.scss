@@ -1,4 +1,4 @@
-@import './fonts.css';
+@import '../../shared/assets/styles/fonts.scss';
 
 // colors
 $background-color: rgba(177, 177, 255, 0.3);
@@ -9,5 +9,5 @@ $second-text-color: #9393C9;
 
 // typography
 $font-for-headers: "Soyuz Grotesk", sans-serif;
-$font-primary: "Raleway", sans-serif;
+$font-for-text: "Raleway", sans-serif;
 $default-line-height: 120%;
