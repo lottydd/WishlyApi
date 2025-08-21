@@ -44,26 +44,6 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**"
                         ).permitAll()
-
-                        // USER + ADMIN
-                        .requestMatchers(HttpMethod.GET, "/api/books/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/catalogs/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/rentals/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/rentals").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/rentals/*/return").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("USER", "ADMIN")
-
-                        // ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/catalogs/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/catalogs/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/catalogs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/book-copies/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
