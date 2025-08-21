@@ -2,7 +2,7 @@ package com.lotty.wishlysystemapi.service;
 
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistCreateDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistUpdateDTO;
-import com.lotty.wishlysystemapi.dto.request.wishlist.AddItemToWishlistDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistResponseDTO;
@@ -47,7 +47,6 @@ public class WishlistService {
         User user = userDAO.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Юзер не найден"));
 
-        //Проверить маппер
         Wishlist wishlist = wishlistMapper.toEntity(dto);
         wishlist.setUser(user);
         wishlist.setCreateDate(LocalDateTime.now());
@@ -99,7 +98,6 @@ public class WishlistService {
         Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId())
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
 
-        //нужен ли маппер
         wishlist.setWishlistName(dto.getWishlistName());
         wishlist.setWishlistDescription(dto.getWishlistDescription());
         wishlist.setModifiedDate(LocalDateTime.now());

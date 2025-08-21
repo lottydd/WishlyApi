@@ -12,7 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Schema(description = "Запрос для удаления вещи из вишлиста")
 public class RemoveItemDTO {
+    @Schema(description = "ID пользователя", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer userId;
+
+    @Schema(description = "ID вишлиста", example = "101", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer wishlistId;
+
+    @Schema(description = "ID вещи", example = "201", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer itemId;
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Запрос  для обновления данных пользователя")
+@Schema(description = "Запрос для обновления данных пользователя")
 public class UserUpdateDTO {
     @Size(min = 5, max = 16)
     @Schema(description = "Имя пользователя", example = "john", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -21,10 +21,10 @@ public class UserUpdateDTO {
     private String username;
 
     @Schema(description = "Email пользователя", example = "john@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Email  не может быть пустым")
+    @NotBlank(message = "Email не может быть пустым")
     @Email
     private String email;
 
+    @Schema(description = "Описание пользователя", example = "Люблю писать вишлисты")
     private String description;
-
 }

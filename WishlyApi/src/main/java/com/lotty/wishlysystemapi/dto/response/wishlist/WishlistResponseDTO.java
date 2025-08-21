@@ -1,16 +1,28 @@
 package com.lotty.wishlysystemapi.dto.response.wishlist;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
+@Schema(description = "DTO с полной информацией о вишлисте")
 public class WishlistResponseDTO {
-
-
+    @Schema(description = "ID пользователя", example = "1")
     private Integer userId;
-    private Integer wishlistId;
-    private String wishlistName;
-    private String wishlistDescription;
-    private LocalDateTime createDate;
-    private LocalDateTime modifiedDate;
-    private Integer itemcount;
 
+    @Schema(description = "ID вишлиста", example = "101")
+    private Integer wishlistId;
+
+    @Schema(description = "Название вишлиста", example = "Список подарков")
+    private String wishlistName;
+
+    @Schema(description = "Описание вишлиста", example = "Список вещей для Нового Года")
+    private String wishlistDescription;
+
+    @Schema(description = "Дата создания", example = "2025-08-21T12:00:00")
+    private LocalDateTime createDate;
+
+    @Schema(description = "Дата изменения", example = "2025-08-21T15:30:00")
+    private LocalDateTime modifiedDate;
+
+    @Schema(description = "Количество вещей", example = "5")
+    private Integer itemcount;
 }

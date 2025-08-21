@@ -1,14 +1,12 @@
 package com.lotty.wishlysystemapi.controller;
 
-import com.lotty.wishlysystemapi.dto.request.wishlist.AddItemToWishlistDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

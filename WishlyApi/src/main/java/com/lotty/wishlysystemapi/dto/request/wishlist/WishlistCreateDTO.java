@@ -1,6 +1,5 @@
 package com.lotty.wishlysystemapi.dto.request.wishlist;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,11 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Schema(description = "Запрос для создания нового вишлиста")
 public class WishlistCreateDTO {
-
+   @Schema(description = "ID пользователя, которому принадлежит вишлист", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
    private Integer userId;
 
+   @Schema(description = "Название вишлиста", example = "Новый год 2025", requiredMode = Schema.RequiredMode.REQUIRED)
    private String wishlistName;
 
+   @Schema(description = "Описание вишлиста", example = "Список подарков к празднику")
    private String wishlistDescription;
-
 }

@@ -1,6 +1,6 @@
 package com.lotty.wishlysystemapi.service;
 
-import com.lotty.wishlysystemapi.dto.request.wishlist.AddItemToWishlistDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
@@ -48,7 +48,6 @@ public class ItemService {
     public ItemResponseDTO updateItem(UpdateItemDTO dto) {
         Item item = itemDAO.findById(dto.getItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
-
         itemMapper.updateItemFromDTO(dto, item);
         Item updatedItem = itemDAO.save(item);
         return itemMapper.toItemResponseDTO(updatedItem);
@@ -56,7 +55,6 @@ public class ItemService {
 
     @Transactional
     public void deleteItem(Integer itemId) {
-        // 1. Находим айтем
         Item item = itemDAO.findById(itemId)
                 .orElseThrow(() -> {
                     logger.error("Айтем с ID {} не найден", itemId);
@@ -73,7 +71,6 @@ public class ItemService {
             logger.debug("Айтем удален из вишлиста ID: {}", wishlist.getWishlistId());
         }
 
-        // 3. Удаляем сам айтем
         itemDAO.delete(item.getItemId());
         logger.info("Айтем с ID {} полностью удален", itemId);
     }

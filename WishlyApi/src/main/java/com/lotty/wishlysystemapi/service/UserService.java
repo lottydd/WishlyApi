@@ -131,7 +131,6 @@ public class UserService {
         return itemMapper.toItemResponseDTOList(user.getOwnedItems());
     }
 
-    // Вспомогательные методы
     private User findUserByIdOrThrow(int userId) {
         return userDAO.findById(userId)
                 .orElseThrow(() -> {
@@ -177,7 +176,6 @@ public class UserService {
             throw new IllegalArgumentException("Данные обновления не могут быть null");
         }
 
-        // Проверка email
         userDAO.findByEmail(dto.getEmail())
                 .filter(user -> !user.getUserId().equals(currentUserId))
                 .ifPresent(user -> {
@@ -185,7 +183,6 @@ public class UserService {
                     throw new IllegalArgumentException("Email уже занят другим пользователем");
                 });
 
-        // Проверка username
         userDAO.findByUsername(dto.getUsername())
                 .filter(user -> !user.getUserId().equals(currentUserId))
                 .ifPresent(user -> {

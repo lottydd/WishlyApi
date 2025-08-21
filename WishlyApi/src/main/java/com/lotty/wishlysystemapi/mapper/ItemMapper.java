@@ -1,7 +1,7 @@
 package com.lotty.wishlysystemapi.mapper;
 
 
-import com.lotty.wishlysystemapi.dto.request.wishlist.AddItemToWishlistDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;

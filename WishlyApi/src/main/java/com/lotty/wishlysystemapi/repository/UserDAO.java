@@ -43,24 +43,24 @@ public class UserDAO extends BaseDAO<User, Integer> {
     }
 
     public boolean existsByEmail(String email) {
-        Long count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class)
+        Integer count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.email = :email", Integer.class)
                 .setParameter("email", email)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean existsByUsername(String username) {
-        Long count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.username = :username", Long.class)
+        Integer count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.username = :username", Integer.class)
                 .setParameter("username", username)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean existsByEmailOrUsername(String email, String username) {
-        Long count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.email = :email OR u.username = :username", Long.class)
+        Integer count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.email = :email OR u.username = :username", Integer.class)
                 .setParameter("email", email)
                 .setParameter("username", username)
                 .getSingleResult();

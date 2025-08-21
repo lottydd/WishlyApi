@@ -1,4 +1,4 @@
-package com.lotty.wishlysystemapi.dto.request.wishlist;
+package com.lotty.wishlysystemapi.dto.request.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

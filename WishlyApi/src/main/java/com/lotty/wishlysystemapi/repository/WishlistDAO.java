@@ -25,8 +25,8 @@ public class WishlistDAO extends BaseDAO<Wishlist, Integer> {
 
     public boolean existsById(Integer wishlistId) {
         logger.info("Проверка существования вишлиста с ID {}", wishlistId);
-        Long count = entityManager.createQuery(
-                        "SELECT COUNT(w) FROM Wishlist w WHERE w.wishlistId = :id", Long.class)
+        Integer count = entityManager.createQuery(
+                        "SELECT COUNT(w) FROM Wishlist w WHERE w.wishlistId = :id", Integer.class)
                 .setParameter("id", wishlistId)
                 .getSingleResult();
         return count > 0;
