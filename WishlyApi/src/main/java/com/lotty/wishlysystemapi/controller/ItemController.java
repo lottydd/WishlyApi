@@ -1,51 +1,55 @@
 package com.lotty.wishlysystemapi.controller;
 
-import com.lotty.wishlysystemapi.model.Item;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
+import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
+import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.service.ItemService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/item")
+@RequestMapping("/api/items")
 public class ItemController {
 
     private final ItemService itemService;
 
-    @Autowired
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
-    @PostMapping
-    public ResponseEntity<Item> createItem(@RequestBody Item item) {
-        Item createdItem = itemService.createItem(item);
-        return ResponseEntity.ok(createdItem);
+    @Operation(summary = "Создать новый айтем", description = "Создание айтема и привязка к пользователю")    @PostMapping
+    public ItemCreateResponseDTO createItem(@RequestBody AddItemToWishlistDTO dto) {
+        return itemService.createItem(dto);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
-        Item item = itemService.getItemById(id);
-        return ResponseEntity.ok(item);
+    @Operation(summary = "Обновить айтем")
+    @PutMapping
+    public ItemResponseDTO updateItem(@RequestBody UpdateItemDTO dto) {
+        return itemService.updateItem(dto);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Item>> getAllItems() {
-        List<Item> items = itemService.getAllItems();
-        return ResponseEntity.ok(items);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Item> updateItem(@PathVariable Long id, @RequestBody Item item) {
-        Item updatedItem = itemService.updateItem(id, item);
-        return ResponseEntity.ok(updatedItem);
-    }
-
+    @Operation(summary = "Удалить айтем")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+    public void deleteItem(
+            @Parameter(description = "ID айтема") @PathVariable Integer id) {
         itemService.deleteItem(id);
-        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Получить айтем по ID")
+    @GetMapping("/{id}")
+    public ItemResponseDTO getItemById(
+            @Parameter(description = "ID айтема") @PathVariable Integer id) {
+        return itemService.getItemById(id);
+    }
+
+    @Operation(summary = "Получить все айтемы пользователя")
+    @GetMapping("/user/{userId}")
+    public List<ItemResponseDTO> getUserItems(
+            @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
+        return itemService.getUserItems(userId);
     }
 }

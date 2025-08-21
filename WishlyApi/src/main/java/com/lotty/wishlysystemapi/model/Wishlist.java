@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "Wishlists")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "Wishlists")
 public class Wishlist {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer wishlistId;
@@ -27,7 +26,7 @@ public class Wishlist {
     @Column(nullable = false)
     private String wishlistName;
 
-    private String description;
+    private String wishlistDescription;
 
     @ManyToMany
     @JoinTable(
@@ -35,15 +34,16 @@ public class Wishlist {
             joinColumns = @JoinColumn(name = "wishlist_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id")
     )
-    private List<Item> itemList = new ArrayList<>();
+    private List<Item> wishlistItems = new ArrayList<>();
 
     @Column(nullable = false)
-    private int itemCount;
-
-    @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
-    @Column(name = "modified_date", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime modifiedDate;
-}
 
+    // Автоматически вычисляемое количество
+    public int getItemCount() {
+        return wishlistItems.size();
+    }
+}

@@ -1,14 +1,19 @@
 package com.lotty.wishlysystemapi.model;
 
+import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 @Entity
-@Data
 @Table(name = "Items")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Item {
@@ -22,15 +27,20 @@ public class Item {
     private String description;
 
     @Column(nullable = false)
-    private double price;
+    private Double price;
 
-    @Column(nullable = false, unique = true)
     private String imageURL;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String sourceURL;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_list_id", nullable = false)
-    private ItemList itemList;
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @ManyToMany(mappedBy = "wishlistItems")
+    private List<Wishlist> inWishlists = new ArrayList<>();
+
+
+
 }
