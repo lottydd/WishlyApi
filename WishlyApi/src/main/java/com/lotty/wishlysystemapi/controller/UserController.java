@@ -1,45 +1,74 @@
 package com.lotty.wishlysystemapi.controller;
 
+import com.lotty.wishlysystemapi.dto.request.RequestIdDTO;
 import com.lotty.wishlysystemapi.dto.request.user.UserCreateDTO;
-import com.lotty.wishlysystemapi.model.User;
+import com.lotty.wishlysystemapi.dto.request.user.UserUpdateDTO;
+import com.lotty.wishlysystemapi.dto.response.user.UserCreateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.user.UserResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.user.UserUpdateResponseDTO;
 import com.lotty.wishlysystemapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "Users", description = "Операции с пользователями")
 public class UserController {
 
     private final UserService userService;
-    @Autowired
-    public UserController(UserService userService) { this.userService = userService; }
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Operation(summary = "Создать нового пользователя", description = "Регистрация нового пользователя в системе")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно создан"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные")
+    })
     @PostMapping
-    @Operation(summary = "Создать нового пользователя")
-    public ResponseEntity<User> createUser(@RequestBody UserCreateDTO dto) {
-        return ResponseEntity.ok(userService.createUser(dto));
+    public UserCreateResponseDTO createUser(@RequestBody UserCreateDTO dto) {
+        return userService.createUser(dto);
     }
 
-    @PatchMapping("/{id}/email")
-    @Operation(summary = "Изменить email пользователя")
-    public ResponseEntity<User> updateEmail(@PathVariable Integer id, @RequestParam String email) {
-        return ResponseEntity.ok(userService.updateEmail(id, email));
+    @Operation(summary = "Получить пользователя по ID")
+    @GetMapping("/{id}")
+    public UserResponseDTO getUserById(
+            @Parameter(description = "ID пользователя") @PathVariable Integer id) {
+        return userService.findUserById(new RequestIdDTO(id));
     }
 
-    @PatchMapping("/{id}/description")
-    @Operation(summary = "Изменить описание пользователя")
-    public ResponseEntity<User> updateDescription(@PathVariable Integer id, @RequestParam String description) {
-        return ResponseEntity.ok(userService.updateDescription(id, description));
+    @Operation(summary = "Обновить данные пользователя")
+    @PutMapping("/{id}")
+    public UserUpdateResponseDTO updateUser(
+            @Parameter(description = "ID пользователя") @PathVariable Integer id,
+            @RequestBody UserUpdateDTO dto) {
+        return userService.updateUser(id, dto);
     }
 
-    @PatchMapping("/{id}/password")
     @Operation(summary = "Изменить пароль пользователя")
-    public ResponseEntity<User> updatePassword(@PathVariable Integer id, @RequestParam String password) {
-        return ResponseEntity.ok(userService.updatePassword(id, password));
+    @PutMapping("/{id}/password")
+    public void changePassword(
+            @Parameter(description = "ID пользователя") @PathVariable Integer id,
+            @RequestParam String newPassword) {
+        userService.changePassword(id, newPassword);
+    }
+
+    @Operation(summary = "Назначить роль пользователю")
+    @PostMapping("/{id}/roles/{role}")
+    public UserUpdateResponseDTO assignRoleToUser(
+            @PathVariable Integer id,
+            @PathVariable String role) {
+        return userService.assignRoleToUser(id, role);
+    }
+
+    @Operation(summary = "Удалить роль у пользователя")
+    @DeleteMapping("/{id}/roles/{role}")
+    public UserUpdateResponseDTO deleteRoleFromUser(
+            @PathVariable Integer id,
+            @PathVariable String role) {
+        return userService.deleteRoleFromUser(id, role);
     }
 }

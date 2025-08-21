@@ -14,6 +14,8 @@ public class AddItemToWishlistDTO {
 
     private Integer wishlistId;
 
+    private String description;
+
     private String sourceURL;
 
     private Double price;
@@ -21,6 +23,5 @@ public class AddItemToWishlistDTO {
     private String itemName;
 
     private String imageURL;
-
 
 }

@@ -1,8 +1,9 @@
 package com.lotty.wishlysystemapi.service;
 
-import com.lotty.wishlysystemapi.dto.request.RequestIdDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
+import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.mapper.ItemMapper;
 import com.lotty.wishlysystemapi.model.Item;
 import com.lotty.wishlysystemapi.model.User;
@@ -34,35 +35,25 @@ public class ItemService {
     }
 
     @Transactional
-    public Item createItem(AddItemToWishlistDTO dto) {
+    public ItemCreateResponseDTO createItem(AddItemToWishlistDTO dto) {
         logger.info("Создание нового айтема для Пользователя: {}", dto.getUserId());
         User owner = userDAO.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
         Item item = itemMapper.toEntity(dto);
         item.setOwner(owner);
-        return itemDAO.save(item);
-    }
-
-    @Transactional(readOnly = true)
-    public Item getItemById(Integer itemId) {
-        return itemDAO.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
+        return itemMapper.toItemCreateResponseDTO(itemDAO.save(item));
     }
 
     @Transactional
-    public Item updateItem(UpdateItemDTO dto) {
+    public ItemResponseDTO updateItem(UpdateItemDTO dto) {
         Item item = itemDAO.findById(dto.getItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
 
-        //нужен маппер скорее всего
-        item.setDescription(dto.getDescription());
-        item.setPrice(dto.getPrice());
-        item.setItemName(dto.getItemName());
-        item.setSourceURL(dto.getSourceURL());
-        item.setImageURL(dto.getImageURL());
-
-        return itemDAO.save(item);
+        itemMapper.updateItemFromDTO(dto, item);
+        Item updatedItem = itemDAO.save(item);
+        return itemMapper.toItemResponseDTO(updatedItem);
     }
+
     @Transactional
     public void deleteItem(Integer itemId) {
         // 1. Находим айтем
@@ -74,7 +65,7 @@ public class ItemService {
 
         logger.info("Начат процесс удаления айтема с ID: {}", itemId);
 
-        // 2. Удаляем айтем из всех вишлистов (если используется связь ManyToMany)
+        //(ManyToMany)
         List<Wishlist> wishlistsWithItem = wishlistDAO.findAllByItemId(itemId);
         for (Wishlist wishlist : wishlistsWithItem) {
             wishlist.getWishlistItems().remove(item);
@@ -86,9 +77,15 @@ public class ItemService {
         itemDAO.delete(item.getItemId());
         logger.info("Айтем с ID {} полностью удален", itemId);
     }
-    
+
     @Transactional(readOnly = true)
-    public List<Item> getUserItems(Integer userId) {
-        return itemDAO.findAllByOwnerId(userId);
+    public List<ItemResponseDTO> getUserItems(Integer userId) {
+        return itemMapper.toItemResponseDTOList(itemDAO.findAllByOwnerId(userId));
+    }
+
+    @Transactional(readOnly = true)
+    public ItemResponseDTO getItemById(Integer itemId) {
+        return itemMapper.toItemResponseDTO(itemDAO.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Айтем не найден")));
     }
 }

@@ -26,7 +26,7 @@ public class Wishlist {
     @Column(nullable = false)
     private String wishlistName;
 
-    private String description;
+    private String wishlistDescription;
 
     @ManyToMany
     @JoinTable(

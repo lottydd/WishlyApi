@@ -1,21 +1,12 @@
 package com.lotty.wishlysystemapi.dto.response.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
-@Setter
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Schema(description = "DTO с информацией о пользователе")
-public class UserDTO {
+public class UserCreateResponseDTO {
     @Schema(description = "ID пользователя", example = "1")
-    private Integer id;
+    private Integer userId;
 
     @Schema(description = "Имя пользователя", example = "john")
     private String username;
@@ -28,6 +19,4 @@ public class UserDTO {
 
     @Schema(description = "Список ролей пользователя", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
     private List<String> roles;
-
-
 }
