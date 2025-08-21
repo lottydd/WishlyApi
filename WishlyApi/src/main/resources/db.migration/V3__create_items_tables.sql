@@ -1,0 +1,10 @@
+CREATE TABLE Items (
+    itemId INT AUTO_INCREMENT PRIMARY KEY,
+    itemName VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    price DOUBLE NOT NULL,
+    imageURL VARCHAR(255),
+    sourceURL VARCHAR(255) NOT NULL,
+    owner_id INT NOT NULL,
+    CONSTRAINT FK_Item_User FOREIGN KEY (owner_id) REFERENCES Users(userId) ON DELETE CASCADE
+);
