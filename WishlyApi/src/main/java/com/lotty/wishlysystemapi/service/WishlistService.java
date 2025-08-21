@@ -18,6 +18,7 @@ import com.lotty.wishlysystemapi.repository.WishlistDAO;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class WishlistService {
     private final ItemDAO itemDAO;
     private final ItemMapper itemMapper;
 
+    @Autowired
     public WishlistService(WishlistMapper wishlistMapper, UserDAO userDAO,
                            WishlistDAO wishlistDAO, ItemDAO itemDAO, ItemMapper itemMapper) {
         this.wishlistMapper = wishlistMapper;
