@@ -17,6 +17,6 @@ public class Role {
     @Column(name = "roleId", nullable = false)
     private int roleId;
 
-    @Column(name = "roleName", nullable = false, unique = true) // Роль обычно уникальна
+    @Column(name = "roleName", nullable = false, unique = true)
     private String roleName;
 }
