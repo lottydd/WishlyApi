@@ -105,13 +105,11 @@ public class UserService {
 
     @Transactional
     public void changePassword(int userId, String newPassword) {
-        logger.info("Попытка смены пароля пользователя. UserID: {}", userId);
-
+        logger.info("Попытка смены пароля для пользователя ID: {}", userId);
         User user = findUserByIdOrThrow(userId);
         user.setPassword(passwordEncoder.encode(newPassword));
         userDAO.save(user);
-
-        logger.info("Пароль пользователя изменен. UserID: {}", userId);
+        logger.info("Пароль успешно изменен для пользователя ID: {}", userId);
     }
 
     @Transactional
@@ -131,8 +129,15 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<ItemResponseDTO> getUserItems(Integer userId) {
+        logger.info("Получение списка айтемов для пользователя ID: {}", userId);
         User user = findUserByIdOrThrow(userId);
-        return itemMapper.toItemResponseDTOList(user.getOwnedItems());
+        List<ItemResponseDTO> items = itemMapper.toItemResponseDTOList(user.getOwnedItems());
+        if (items.isEmpty()) {
+            logger.warn("У пользователя ID {} нет айтемов", userId);
+        } else {
+            logger.info("У пользователя ID {} найдено {} айтемов", userId, items.size());
+        }
+        return items;
     }
 
     private User findUserByIdOrThrow(int userId) {

@@ -11,10 +11,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "Управление пользователями")
 public class UserController {
 
     private final UserService userService;
@@ -56,6 +59,7 @@ public class UserController {
         userService.changePassword(id, newPassword);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Назначить роль пользователю")
     @PostMapping("/{id}/roles/{role}")
     public UserUpdateResponseDTO assignRoleToUser(
@@ -64,6 +68,7 @@ public class UserController {
         return userService.assignRoleToUser(id, role);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Удалить роль у пользователя")
     @DeleteMapping("/{id}/roles/{role}")
     public UserUpdateResponseDTO deleteRoleFromUser(
