@@ -1,8 +1,14 @@
 package com.lotty.wishlysystemapi.dto.response.wishlist;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "DTO с полной информацией о вишлисте")
 public class WishlistResponseDTO {
     @Schema(description = "ID пользователя", example = "1")
@@ -24,5 +30,5 @@ public class WishlistResponseDTO {
     private LocalDateTime modifiedDate;
 
     @Schema(description = "Количество вещей", example = "5")
-    private Integer itemcount;
+    private Integer itemCount;
 }

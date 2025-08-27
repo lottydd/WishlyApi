@@ -18,11 +18,10 @@ public interface WishlistMapper {
 
     @Mapping(target = "wishlistId", ignore = true) // генерируется БД
     @Mapping(target = "user", ignore = true)       // установим вручную
-    @Mapping(target = "itemList", ignore = true)   // пустой при создании
-    @Mapping(target = "itemCount", constant = "0")
+    @Mapping(target = "wishlistItems", ignore = true)  // пустой при создании
     @Mapping(target = "createDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "modifiedDate", expression = "java(java.time.LocalDateTime.now())")
-    Wishlist toEntity (WishlistCreateDTO dto);
+    Wishlist toEntity(WishlistCreateDTO dto);
 
     WishlistCreateResponseDTO toWishlistCreateDTO(Wishlist wishlist);
 
