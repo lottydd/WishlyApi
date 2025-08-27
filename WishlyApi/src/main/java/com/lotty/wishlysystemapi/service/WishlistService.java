@@ -164,7 +164,7 @@ public class WishlistService {
         }
         return items;
     }
-    
+
     @Transactional(readOnly = true)
     public WishlistResponseDTO getWishlistById(Integer wishlistId) {
         logger.info("Поиск вишлиста по ID: {}", wishlistId);
