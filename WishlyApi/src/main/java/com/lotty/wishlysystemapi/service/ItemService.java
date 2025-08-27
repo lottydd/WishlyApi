@@ -38,21 +38,43 @@ public class ItemService {
 
     @Transactional
     public ItemCreateResponseDTO createItem(AddItemToWishlistDTO dto) {
-        logger.info("Создание нового айтема для Пользователя: {}", dto.getUserId());
+        logger.info("Создание нового айтема для пользователя ID: {}", dto.getUserId());
         User owner = userDAO.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> {
+                    logger.error("Пользователь с ID {} не найден", dto.getUserId());
+                    return new EntityNotFoundException("Пользователь не найден");
+                });
         Item item = itemMapper.toEntity(dto);
         item.setOwner(owner);
-        return itemMapper.toItemCreateResponseDTO(itemDAO.save(item));
+        Item savedItem = itemDAO.save(item);
+        logger.info("Айтем успешно создан с ID: {}", savedItem.getItemId());
+        return itemMapper.toItemCreateResponseDTO(savedItem);
     }
 
     @Transactional
     public ItemResponseDTO updateItem(UpdateItemDTO dto) {
+        logger.info("Обновление айтема с ID: {}", dto.getItemId());
         Item item = itemDAO.findById(dto.getItemId())
-                .orElseThrow(() -> new EntityNotFoundException("Айтем не найден"));
+                .orElseThrow(() -> {
+                    logger.error("Айтем с ID {} не найден для обновления", dto.getItemId());
+                    return new EntityNotFoundException("Айтем не найден");
+                });
         itemMapper.updateItemFromDTO(dto, item);
         Item updatedItem = itemDAO.save(item);
+        logger.info("Айтем с ID {} успешно обновлён", updatedItem.getItemId());
         return itemMapper.toItemResponseDTO(updatedItem);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemResponseDTO> getUserItems(Integer userId) {
+        logger.info("Получение айтемов пользователя ID: {}", userId);
+        List<ItemResponseDTO> items = itemMapper.toItemResponseDTOList(itemDAO.findAllByOwnerId(userId));
+        if (items.isEmpty()) {
+            logger.warn("У пользователя ID {} нет айтемов", userId);
+        } else {
+            logger.info("Найдено {} айтемов у пользователя ID {}", items.size(), userId);
+        }
+        return items;
     }
 
     @Transactional
@@ -77,10 +99,6 @@ public class ItemService {
         logger.info("Айтем с ID {} полностью удален", itemId);
     }
 
-    @Transactional(readOnly = true)
-    public List<ItemResponseDTO> getUserItems(Integer userId) {
-        return itemMapper.toItemResponseDTOList(itemDAO.findAllByOwnerId(userId));
-    }
 
     @Transactional(readOnly = true)
     public ItemResponseDTO getItemById(Integer itemId) {

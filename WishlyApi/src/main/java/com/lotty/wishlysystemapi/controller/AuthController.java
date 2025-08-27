@@ -3,6 +3,8 @@ package com.lotty.wishlysystemapi.controller;
 import com.lotty.wishlysystemapi.dto.request.security.AuthRequestDTO;
 import com.lotty.wishlysystemapi.dto.response.security.AuthResponseDTO;
 import com.lotty.wishlysystemapi.security.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,17 +13,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Auth ", description = "авторизация пользователей")
-
+@Tag(name = "Auth", description = "Авторизация пользователей")
 public class AuthController {
 
     private final AuthenticationManager authManager;
@@ -34,6 +32,10 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
     }
 
+    @Operation(summary = "Вход в систему", description = "Авторизация пользователя и выдача JWT токена")
+    @ApiResponse(responseCode = "200", description = "Успешная авторизация")
+    @ApiResponse(responseCode = "401", description = "Неверный логин или пароль")
+    @ApiResponse(responseCode = "500", description = "Ошибка сервера")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO request) {
         try {

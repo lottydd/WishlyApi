@@ -46,14 +46,20 @@ public class WishlistService {
 
     @Transactional
     public WishlistCreateResponseDTO createWishlist(WishlistCreateDTO dto) {
+        logger.info("Создание вишлиста для пользователя ID: {}", dto.getUserId());
         User user = userDAO.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("Юзер не найден"));
+                .orElseThrow(() -> {
+                    logger.error("Пользователь с ID {} не найден при создании вишлиста", dto.getUserId());
+                    return new EntityNotFoundException("Юзер не найден");
+                });
 
         Wishlist wishlist = wishlistMapper.toEntity(dto);
         wishlist.setUser(user);
         wishlist.setCreateDate(LocalDateTime.now());
         wishlist.setModifiedDate(LocalDateTime.now());
-        return wishlistMapper.toWishlistCreateDTO(wishlistDAO.save(wishlist));
+        Wishlist savedWishlist = wishlistDAO.save(wishlist);
+        logger.info("Вишлист успешно создан с ID: {}", savedWishlist.getWishlistId());
+        return wishlistMapper.toWishlistCreateDTO(savedWishlist);
     }
 
     @Transactional
@@ -92,9 +98,15 @@ public class WishlistService {
 
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getUserWishlists(Integer userId) {
-        return wishlistMapper.toWishlistResponseDTOList(wishlistDAO.findAllByUserId(userId));
+        logger.info("Получение вишлистов пользователя ID: {}", userId);
+        List<WishlistResponseDTO> wishlists = wishlistMapper.toWishlistResponseDTOList(wishlistDAO.findAllByUserId(userId));
+        if (wishlists.isEmpty()) {
+            logger.warn("У пользователя ID {} нет вишлистов", userId);
+        } else {
+            logger.info("Найдено {} вишлистов у пользователя ID {}", wishlists.size(), userId);
+        }
+        return wishlists;
     }
-
     @Transactional
     public WishlistUpdateResponseDTO updateWishlist(WishlistUpdateDTO dto) {
         Wishlist wishlist = wishlistDAO.findById(dto.getWishlistId())
@@ -135,12 +147,24 @@ public class WishlistService {
         return wishlistMapper.toWishlistUpdateDTO(wishlistDAO.save(wishlist));
     }
 
+
     @Transactional(readOnly = true)
     public List<ItemResponseDTO> getWishlistItems(Integer wishlistId) {
-      return   itemMapper.toItemResponseDTOList(wishlistDAO.findById(wishlistId)
-                .orElseThrow(() -> new EntityNotFoundException("Вишлист не найден"))
+        logger.info("Получение айтемов для вишлиста ID: {}", wishlistId);
+        List<ItemResponseDTO> items = itemMapper.toItemResponseDTOList(wishlistDAO.findById(wishlistId)
+                .orElseThrow(() -> {
+                    logger.error("Вишлист с ID {} не найден при получении айтемов", wishlistId);
+                    return new EntityNotFoundException("Вишлист не найден");
+                })
                 .getWishlistItems());
+        if (items.isEmpty()) {
+            logger.warn("Вишлист ID {} пуст", wishlistId);
+        } else {
+            logger.info("Вишлист ID {} содержит {} айтемов", wishlistId, items.size());
+        }
+        return items;
     }
+
     @Transactional(readOnly = true)
     public WishlistResponseDTO getWishlistById(Integer wishlistId) {
         logger.info("Поиск вишлиста по ID: {}", wishlistId);

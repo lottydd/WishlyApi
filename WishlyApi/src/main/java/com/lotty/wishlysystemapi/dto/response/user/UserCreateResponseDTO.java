@@ -1,8 +1,14 @@
 package com.lotty.wishlysystemapi.dto.response.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.List;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Ответ при создании пользователя")
 public class UserCreateResponseDTO {
     @Schema(description = "ID пользователя", example = "1")

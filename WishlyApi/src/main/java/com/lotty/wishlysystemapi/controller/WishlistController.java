@@ -8,12 +8,14 @@ import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistUpdateResponseDTO
 import com.lotty.wishlysystemapi.service.WishlistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/wishlists")
+@Tag(name = "Wishlists", description = "Управление вишлистами")
 public class WishlistController {
 
     private final WishlistService wishlistService;
@@ -50,7 +52,7 @@ public class WishlistController {
 
     @Operation(summary = "Удалить вишлист")
     @DeleteMapping("/{id}")
-    public void deleteWishlist(@PathVariable Integer id) {
+    public void deleteWishlist(@Parameter(description = "ID вишлиста") @PathVariable Integer id) {
         wishlistService.deleteWishlist(id);
     }
 }

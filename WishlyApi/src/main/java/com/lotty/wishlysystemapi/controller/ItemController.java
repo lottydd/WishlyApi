@@ -7,12 +7,14 @@ import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")
+@Tag(name = "Items", description = "Управление айтемами")
 public class ItemController {
 
     private final ItemService itemService;
@@ -21,7 +23,8 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @Operation(summary = "Создать новый айтем", description = "Создание айтема и привязка к пользователю")    @PostMapping
+    @Operation(summary = "Создать новый айтем", description = "Создание айтема и привязка к пользователю")
+    @PostMapping
     public ItemCreateResponseDTO createItem(@RequestBody AddItemToWishlistDTO dto) {
         return itemService.createItem(dto);
     }
@@ -46,7 +49,7 @@ public class ItemController {
         return itemService.getItemById(id);
     }
 
-    @Operation(summary = "Получить все айтемы пользователя")
+    @Operation(summary = "Получить все айтемы пользователя", description = "⚠ Доступ только к своим айтемам")
     @GetMapping("/user/{userId}")
     public List<ItemResponseDTO> getUserItems(
             @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
