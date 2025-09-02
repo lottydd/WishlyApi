@@ -8,6 +8,8 @@ import com.lotty.wishlysystemapi.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,34 +27,39 @@ public class ItemController {
 
     @Operation(summary = "Создать новый айтем", description = "Создание айтема и привязка к пользователю")
     @PostMapping
-    public ItemCreateResponseDTO createItem(@RequestBody AddItemToWishlistDTO dto) {
-        return itemService.createItem(dto);
+    public ResponseEntity<ItemCreateResponseDTO> createItem(@RequestBody AddItemToWishlistDTO dto) {
+        ItemCreateResponseDTO response = itemService.createItem(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Обновить айтем")
     @PutMapping
-    public ItemResponseDTO updateItem(@RequestBody UpdateItemDTO dto) {
-        return itemService.updateItem(dto);
+    public ResponseEntity<ItemResponseDTO> updateItem(@RequestBody UpdateItemDTO dto) {
+        ItemResponseDTO response = itemService.updateItem(dto);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Удалить айтем")
     @DeleteMapping("/{id}")
-    public void deleteItem(
+    public ResponseEntity<Void> deleteItem(
             @Parameter(description = "ID айтема") @PathVariable Integer id) {
         itemService.deleteItem(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Получить айтем по ID")
     @GetMapping("/{id}")
-    public ItemResponseDTO getItemById(
+    public ResponseEntity<ItemResponseDTO> getItemById(
             @Parameter(description = "ID айтема") @PathVariable Integer id) {
-        return itemService.getItemById(id);
+        ItemResponseDTO response = itemService.getItemById(id);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Получить все айтемы пользователя", description = "⚠ Доступ только к своим айтемам")
     @GetMapping("/user/{userId}")
-    public List<ItemResponseDTO> getUserItems(
+    public ResponseEntity<List<ItemResponseDTO>> getUserItems(
             @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
-        return itemService.getUserItems(userId);
+        List<ItemResponseDTO> response = itemService.getUserItems(userId);
+        return ResponseEntity.ok(response);
     }
 }
