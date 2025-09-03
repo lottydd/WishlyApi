@@ -57,4 +57,3 @@
 
 ## Авторы
 * [lottydd](https://github.com/lottydd) Backend
-* [Shelmanka](https://github.com/Shelmanka) Frontend
