@@ -26,7 +26,7 @@ public class ParserController {
     @GetMapping("/parse")
     public ResponseEntity<ItemParseResponseDTO> parseProduct(@RequestParam String url) {
         ItemParseResponseDTO response;
-
+        //temp
         if (url.contains("ozon.ru")) {
             response = ozonParserService.parseProduct(url);
             return ResponseEntity.ok(response);
