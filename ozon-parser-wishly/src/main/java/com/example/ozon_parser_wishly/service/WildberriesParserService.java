@@ -1,5 +1,6 @@
 package com.example.ozon_parser_wishly.service;
 
+import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -17,7 +18,7 @@ import java.util.Map;
 @Service
 public class WildberriesParserService {
 
-    public Map<String, Object> parseProduct(String url) {
+    public ItemParseResponseDTO parseProduct(String url) {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--window-size=1920,1080");
@@ -28,8 +29,7 @@ public class WildberriesParserService {
 
         WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-
-        Map<String, Object> result = new HashMap<>();
+        ItemParseResponseDTO itemParseResponseDTO = new ItemParseResponseDTO();
 
         try {
             driver.get(url);
@@ -41,10 +41,11 @@ public class WildberriesParserService {
                     ((JavascriptExecutor) d).executeScript("return document.querySelector('h1') !== null").equals(true)
             );
 
-            result.put("title", getText(driver, "h1"));
-            result.put("mainImage", getMainImage(driver));
-            result.put("price", getPrice(driver));
-            result.put("description", getDescription(driver));
+            itemParseResponseDTO.setDescription(getText(driver, "h1"));
+            itemParseResponseDTO.setItemName(getDescription(driver));
+            itemParseResponseDTO.setSourceURL(url);
+            itemParseResponseDTO.setPrice(Double.valueOf(getPrice(driver)));
+            itemParseResponseDTO.setImageURL(getMainImage(driver));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,7 +53,7 @@ public class WildberriesParserService {
             driver.quit();
         }
 
-        return result;
+        return itemParseResponseDTO;
     }
 
     private void makeBrowserLookHuman(WebDriver driver) {

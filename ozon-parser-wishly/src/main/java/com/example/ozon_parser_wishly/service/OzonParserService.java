@@ -1,5 +1,6 @@
 package com.example.ozon_parser_wishly.service;
 
+import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openqa.selenium.*;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class OzonParserService {
 
-    public Map<String, Object> parseProduct(String url) {
+    public ItemParseResponseDTO parseProduct(String url) {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new"); // headless режим
         options.addArguments("--window-size=1920,1080");
@@ -32,7 +33,7 @@ public class OzonParserService {
         WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
-        Map<String, Object> result = new HashMap<>();
+        ItemParseResponseDTO itemParseResponseDTO = new ItemParseResponseDTO();
 
         try {
             driver.get(url);
@@ -43,19 +44,18 @@ public class OzonParserService {
                             "return document.querySelector('div[data-widget=\"webProductHeading\"] h1') !== null"
                     ).equals(true)
             );
-
-            result.put("title", getText(driver, "div[data-widget='webProductHeading'] h1"));
-            result.put("mainImage", getMainImage(driver, wait));
-            result.put("price", getPrice(driver, wait));
-            result.put("description", getDescription(driver, wait));
+            itemParseResponseDTO.setItemName(getText(driver, "div[data-widget='webProductHeading'] h1"));
+            itemParseResponseDTO.setImageURL( getMainImage(driver, wait));
+            itemParseResponseDTO.setSourceURL(url);
+            itemParseResponseDTO.setPrice(Double.valueOf(getPrice(driver, wait)));
+            itemParseResponseDTO.setDescription(getDescription(driver, wait));
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             driver.quit();
         }
-
-        return result;
+        return itemParseResponseDTO;
     }
 
     private String getPrice(WebDriver driver, WebDriverWait wait) {
@@ -120,7 +120,6 @@ public class OzonParserService {
         } catch (Exception e) {
             System.err.println("Ошибка при получении цены: " + e.getMessage());
         }
-
         return "Не найдена";
     }
 

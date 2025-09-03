@@ -9,6 +9,8 @@ import com.lotty.wishlysystemapi.service.WishlistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,33 +28,38 @@ public class WishlistController {
 
     @Operation(summary = "Создать новый вишлист")
     @PostMapping
-    public WishlistCreateResponseDTO createWishlist(@RequestBody WishlistCreateDTO dto) {
-        return wishlistService.createWishlist(dto);
+    public ResponseEntity<WishlistCreateResponseDTO> createWishlist(@RequestBody WishlistCreateDTO dto) {
+        WishlistCreateResponseDTO response = wishlistService.createWishlist(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Получить все вишлисты пользователя")
     @GetMapping("/user/{userId}")
-    public List<WishlistResponseDTO> getUserWishlists(
+    public ResponseEntity<List<WishlistResponseDTO>> getUserWishlists(
             @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
-        return wishlistService.getUserWishlists(userId);
+        List<WishlistResponseDTO> response = wishlistService.getUserWishlists(userId);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Получить вишлист по ID")
     @GetMapping("/{id}")
-    public WishlistResponseDTO getWishlistById(
+    public ResponseEntity<WishlistResponseDTO> getWishlistById(
             @Parameter(description = "ID вишлиста") @PathVariable Integer id) {
-        return wishlistService.getWishlistById(id);
+        WishlistResponseDTO response = wishlistService.getWishlistById(id);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Обновить вишлист")
     @PutMapping
-    public WishlistUpdateResponseDTO updateWishlist(@RequestBody WishlistUpdateDTO dto) {
-        return wishlistService.updateWishlist(dto);
+    public ResponseEntity<WishlistUpdateResponseDTO> updateWishlist(@RequestBody WishlistUpdateDTO dto) {
+        WishlistUpdateResponseDTO response = wishlistService.updateWishlist(dto);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Удалить вишлист")
     @DeleteMapping("/{id}")
-    public void deleteWishlist(@Parameter(description = "ID вишлиста") @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteWishlist(@Parameter(description = "ID вишлиста") @PathVariable Integer id) {
         wishlistService.deleteWishlist(id);
+        return ResponseEntity.noContent().build();
     }
 }

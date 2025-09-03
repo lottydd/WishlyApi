@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,52 +30,58 @@ public class UserController {
 
     @Operation(summary = "Создать нового пользователя", description = "Регистрация нового пользователя в системе")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Пользователь успешно создан"),
+            @ApiResponse(responseCode = "201", description = "Пользователь успешно создан"),
             @ApiResponse(responseCode = "400", description = "Некорректные данные")
     })
     @PostMapping
-    public UserCreateResponseDTO createUser(@RequestBody UserCreateDTO dto) {
-        return userService.createUser(dto);
+    public ResponseEntity<UserCreateResponseDTO> createUser(@RequestBody UserCreateDTO dto) {
+        UserCreateResponseDTO response = userService.createUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Получить пользователя по ID")
     @GetMapping("/{id}")
-    public UserResponseDTO getUserById(
+    public ResponseEntity<UserResponseDTO> getUserById(
             @Parameter(description = "ID пользователя") @PathVariable Integer id) {
-        return userService.findUserById(new RequestIdDTO(id));
+        UserResponseDTO response = userService.findUserById(new RequestIdDTO(id));
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Обновить данные пользователя")
     @PutMapping("/{id}")
-    public UserUpdateResponseDTO updateUser(
+    public ResponseEntity<UserUpdateResponseDTO> updateUser(
             @Parameter(description = "ID пользователя") @PathVariable Integer id,
             @RequestBody UserUpdateDTO dto) {
-        return userService.updateUser(id, dto);
+        UserUpdateResponseDTO response = userService.updateUser(id, dto);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Изменить пароль пользователя")
     @PutMapping("/{id}/password")
-    public void changePassword(
+    public ResponseEntity<Void> changePassword(
             @Parameter(description = "ID пользователя") @PathVariable Integer id,
             @RequestParam String newPassword) {
         userService.changePassword(id, newPassword);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Назначить роль пользователю")
     @PostMapping("/{id}/roles/{role}")
-    public UserUpdateResponseDTO assignRoleToUser(
+    public ResponseEntity<UserUpdateResponseDTO> assignRoleToUser(
             @PathVariable Integer id,
             @PathVariable String role) {
-        return userService.assignRoleToUser(id, role);
+        UserUpdateResponseDTO response = userService.assignRoleToUser(id, role);
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Удалить роль у пользователя")
     @DeleteMapping("/{id}/roles/{role}")
-    public UserUpdateResponseDTO deleteRoleFromUser(
+    public ResponseEntity<UserUpdateResponseDTO> deleteRoleFromUser(
             @PathVariable Integer id,
             @PathVariable String role) {
-        return userService.deleteRoleFromUser(id, role);
+        UserUpdateResponseDTO response = userService.deleteRoleFromUser(id, role);
+        return ResponseEntity.ok(response);
     }
 }
