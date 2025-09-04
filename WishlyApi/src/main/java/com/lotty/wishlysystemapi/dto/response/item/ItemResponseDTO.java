@@ -1,7 +1,9 @@
 package com.lotty.wishlysystemapi.dto.response.item;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
+@Data
 @Schema(description = "DTO с информацией о вещи")
 public class ItemResponseDTO {
     @Schema(description = "Название вещи", example = "iPhone 15")
