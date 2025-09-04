@@ -1,6 +1,6 @@
 package com.example.ozon_parser_wishly.service;
 
-import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
+import com.example.common.dto.ItemParseResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openqa.selenium.*;

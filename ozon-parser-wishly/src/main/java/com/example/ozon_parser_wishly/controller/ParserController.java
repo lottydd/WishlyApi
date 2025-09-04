@@ -1,6 +1,6 @@
 package com.example.ozon_parser_wishly.controller;
 
-import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
+import com.example.common.dto.ItemParseResponseDTO;
 import com.example.ozon_parser_wishly.service.OzonParserService;
 import com.example.ozon_parser_wishly.service.WildberriesParserService;
 import org.springframework.http.HttpStatus;

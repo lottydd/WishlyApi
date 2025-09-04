@@ -1,4 +1,5 @@
-package com.example.ozon_parser_wishly.dto.response;
+
+package com.example.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.example.ozon_parser_wishly.service;
 
-import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
+import com.example.common.dto.ItemParseResponseDTO;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class WildberriesParserService {

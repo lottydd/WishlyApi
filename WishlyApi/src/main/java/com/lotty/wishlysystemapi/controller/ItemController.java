@@ -1,10 +1,12 @@
 package com.lotty.wishlysystemapi.controller;
 
+import com.example.common.dto.ParseRequestDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.service.ItemService;
+import com.lotty.wishlysystemapi.service.KafkaProducerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,9 +22,24 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final KafkaProducerService kafkaProducerService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, KafkaProducerService kafkaProducerService) {
         this.itemService = itemService;
+        this.kafkaProducerService = kafkaProducerService;
+    }
+
+
+    @Operation(summary = "Отправить URL на парсинг")
+    @PostMapping("/parse")
+    public ResponseEntity<String> sendParseRequest(
+            @RequestParam String url,
+            @RequestParam Integer userId,
+            @RequestParam Integer wishlistId
+    ) {
+        ParseRequestDTO request = new ParseRequestDTO(url, userId, wishlistId);
+        kafkaProducerService.sendParseRequest(request);
+        return ResponseEntity.ok("Запрос на парсинг отправлен");
     }
 
     @Operation(summary = "Создать новый айтем", description = "Создание айтема и привязка к пользователю")
