@@ -26,5 +26,12 @@ public class ItemParseResponseDTO {
     @Schema(description = "Источник вещи", example = "http://store.com/item/123")
     private String sourceURL;
 
+    private Integer userId;
+
+    private Integer taskId;
+
+    private String errorMessage;
+
+    private Integer wishlistId;
 
 }

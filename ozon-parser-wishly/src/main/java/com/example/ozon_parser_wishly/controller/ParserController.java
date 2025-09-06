@@ -1,6 +1,7 @@
 package com.example.ozon_parser_wishly.controller;
 
 import com.example.common.dto.ItemParseResponseDTO;
+import com.example.common.dto.ParseRequestDTO;
 import com.example.ozon_parser_wishly.service.OzonParserService;
 import com.example.ozon_parser_wishly.service.WildberriesParserService;
 import org.springframework.http.HttpStatus;
@@ -24,26 +25,18 @@ public class ParserController {
     }
 
     @GetMapping("/parse")
-    public ResponseEntity<ItemParseResponseDTO> parseProduct(@RequestParam String url) {
+    public ResponseEntity<ItemParseResponseDTO> parseProduct(@RequestParam ParseRequestDTO parseRequestDTO) {
         ItemParseResponseDTO response;
-        //temp
-        if (url.contains("ozon.ru")) {
-            response = ozonParserService.parseProduct(url);
+        if (parseRequestDTO.getUrl().contains("ozon.ru")) {
+            response = ozonParserService.parseProduct(parseRequestDTO.getUrl());
             return ResponseEntity.ok(response);
 
-        } else if (url.contains("wildberries.ru")) {
-            response = wbParserService.parseProduct(url);
+        } else if (parseRequestDTO.getUrl().contains("wildberries.ru")) {
+            response = wbParserService.parseProduct(parseRequestDTO.getUrl());
             return ResponseEntity.ok(response);
 
         } else {
-            response = new ItemParseResponseDTO(
-                    "Неизвестно",
-                    "Сайт не поддерживается",
-                    null,
-                    null,
-                    url
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ItemParseResponseDTO());
         }
     }
 }

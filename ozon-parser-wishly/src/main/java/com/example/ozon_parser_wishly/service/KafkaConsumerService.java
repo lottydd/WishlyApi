@@ -2,7 +2,6 @@ package com.example.ozon_parser_wishly.service;
 
 import com.example.common.dto.ItemParseResponseDTO;
 import com.example.common.dto.ParseRequestDTO;
-import com.example.ozon_parser_wishly.dto.response.*;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -23,16 +22,34 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "parse-requests", groupId = "parser-group")
     public void consume(ParseRequestDTO request) {
-        ItemParseResponseDTO response;
+        try {
+            // Парсим как обычно
+            ItemParseResponseDTO response = parseProduct(request.getUrl());
 
-        if (request.getUrl().contains("ozon.ru")) {
-            response = ozonParserService.parseProduct(request.getUrl());
-        } else if (request.getUrl().contains("wildberries.ru")) {
-            response = wbParserService.parseProduct(request.getUrl());
-        } else {
-            response = new ItemParseResponseDTO("Неизвестно", "Сайт не поддерживается", null, null, request.getUrl());
+            // Добавляем taskId в ответ
+            response.setTaskId(request.getTaskId());
+            response.setUserId(request.getUserId());
+
+            kafkaTemplate.send("parse-results", response);
+        } catch (Exception e) {
+            // Отправляем ответ с ошибкой
+            ItemParseResponseDTO errorResponse = new ItemParseResponseDTO();
+            errorResponse.setTaskId(request.getTaskId());
+            errorResponse.setErrorMessage("Ошибка парсинга: " + e.getMessage());
+            kafkaTemplate.send("parse-results", errorResponse);
         }
+    }
 
-        kafkaTemplate.send("parse-results", response);
+
+    private ItemParseResponseDTO parseProduct(String url) {
+        if (url.contains("ozon.ru") || url.contains("ozon.")) {
+            return ozonParserService.parseProduct(url);
+
+        } else if (url.contains("wildberries.ru") || url.contains("wb.ru")) {
+            return wbParserService.parseProduct(url);
+
+        } else {
+            throw new UnsupportedOperationException("Сайт не поддерживается: " + url);
+        }
     }
 }

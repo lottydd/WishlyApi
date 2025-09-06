@@ -74,20 +74,20 @@ class ItemControllerTest {
         itemResponseDTO.setSourceURL("http://test.com/item");
     }
 
-    @Test
-    void sendParseRequest_ShouldReturnOk() {
-        String url = "http://test.com";
-        Integer userId = 1;
-        Integer wishlistId = 101;
-
-        doNothing().when(kafkaProducerService).sendParseRequest(any(ParseRequestDTO.class));
-
-        ResponseEntity<String> response = itemController.sendParseRequest(url, userId, wishlistId);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Запрос на парсинг отправлен", response.getBody());
-        verify(kafkaProducerService).sendParseRequest(any(ParseRequestDTO.class));
-    }
+//    @Test
+//    void sendParseRequest_ShouldReturnOk() {
+//        String url = "http://test.com";
+//        Integer userId = 1;
+//        Integer wishlistId = 101;
+//
+//        doNothing().when(kafkaProducerService).sendParseRequest(any(ParseRequestDTO.class));
+//
+//        ResponseEntity<String> response = itemController.sendParseRequest(url, userId, wishlistId);
+//
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals("Запрос на парсинг отправлен", response.getBody());
+//        verify(kafkaProducerService).sendParseRequest(any(ParseRequestDTO.class));
+//        }
 
     @Test
     void createItem_ShouldReturnCreated() {

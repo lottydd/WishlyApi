@@ -59,7 +59,6 @@ public class UserService {
 
         User savedUser = userDAO.save(user);
         assignRoleToUser(savedUser.getUserId(), "ROLE_USER");
-
         return userMapper.toUserCreateResponseDTO(savedUser);
     }
 
@@ -86,6 +85,14 @@ public class UserService {
         User user = findUserByIdOrThrow(dto.getId());
         return userMapper.toUserResponseDTO(user);
     }
+
+    @Transactional(readOnly = true)
+    public User findUserByIdForTask(Integer userId) {
+        logger.info("Поиск пользователя по ID. UserID: {}", userId);
+        return  findUserByIdOrThrow(userId);
+
+    }
+
 
     @Transactional
     public UserUpdateResponseDTO deleteRoleFromUser(int userId, String roleName) {

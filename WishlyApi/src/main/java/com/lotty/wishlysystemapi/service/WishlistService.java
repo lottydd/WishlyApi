@@ -63,25 +63,21 @@ public class WishlistService {
     }
 
     @Transactional
-    public WishlistUpdateResponseDTO addExistingItemToWishlist(Integer wishlistId, Integer itemId) {
+    public void addExistingItemToWishlist(Integer wishlistId, Item item ) {
         Wishlist wishlist = wishlistDAO.findById(wishlistId)
                 .orElseThrow(() -> new EntityNotFoundException("Вишлист не найден"));
-
-        Item item = itemDAO.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Айтем для добавления не существует"));
-
         if (!wishlist.getWishlistItems().contains(item)) {
             wishlist.getWishlistItems().add(item);
             wishlist.setModifiedDate(LocalDateTime.now());
             wishlistDAO.save(wishlist);
-            logger.info("Айтем с ID {} успешно добавлен в вишлист {}", itemId, wishlistId);
+            logger.info("Айтем с ID {} успешно добавлен в вишлист {}", item.getItemId(), wishlistId);
         } else {
-            logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", itemId, wishlistId);
+            logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", item.getItemId(), wishlistId);
             throw new IllegalArgumentException(
-                    String.format("Айтем с ID %d уже содержится в вишлисте %d", itemId, wishlistId)
+                    String.format("Айтем с ID %d уже содержится в вишлисте %d", item.getItemId(), wishlistId)
             );
         }
-        return wishlistMapper.toWishlistUpdateDTO(wishlist);
+        wishlistMapper.toWishlistUpdateDTO(wishlist);
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.lotty.wishlysystemapi.service;
 
+import com.example.common.dto.ItemParseResponseDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
@@ -50,6 +51,32 @@ public class ItemService {
         logger.info("Айтем успешно создан с ID: {}", savedItem.getItemId());
         return itemMapper.toItemCreateResponseDTO(savedItem);
     }
+
+
+    public Item createItemFromParsedData(ItemParseResponseDTO response) {
+        logger.info("Создание item из распарсенных данных для пользователя ID: {}", response.getUserId());
+
+        Item item = new Item();
+        item.setItemName(response.getItemName());
+        item.setDescription(response.getDescription());
+        item.setPrice(response.getPrice());
+        item.setImageURL(response.getImageURL());
+        item.setSourceURL(response.getSourceURL());
+
+        // Находим владельца
+        User owner = userDAO.findById(response.getUserId())
+                .orElseThrow(() -> {
+                    logger.error("Пользователь с ID {} не найден", response.getUserId());
+                    return new EntityNotFoundException("Пользователь не найден");
+                });
+        item.setOwner(owner);
+
+        Item savedItem = itemDAO.save(item);
+        logger.info("Item создан из парсинга с ID: {}", savedItem.getItemId());
+
+        return savedItem;
+    }
+
 
     @Transactional
     public ItemResponseDTO updateItem(UpdateItemDTO dto) {
@@ -105,4 +132,5 @@ public class ItemService {
         return itemMapper.toItemResponseDTO(itemDAO.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Айтем не найден")));
     }
+
 }

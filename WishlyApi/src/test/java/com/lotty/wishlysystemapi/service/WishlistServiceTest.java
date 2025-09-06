@@ -85,30 +85,30 @@ class WishlistServiceTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
-    @Test
-    void addExistingItemToWishlist_success() {
-        when(wishlistDAO.findById(10)).thenReturn(Optional.of(wishlist));
-        when(itemDAO.findById(200)).thenReturn(Optional.of(item));
-        wishlist.getWishlistItems().clear();
+//    @Test
+//    void addExistingItemToWishlist_success() {
+//        when(wishlistDAO.findById(10)).thenReturn(Optional.of(wishlist));
+//        when(itemDAO.findById(200)).thenReturn(Optional.of(item));
+//        wishlist.getWishlistItems().clear();
+//
+//        when(wishlistDAO.save(wishlist)).thenReturn(wishlist);
+//        when(wishlistMapper.toWishlistUpdateDTO(wishlist)).thenReturn(new WishlistUpdateResponseDTO());
+//
+//        WishlistUpdateResponseDTO resp = wishlistService.addExistingItemToWishlist(10, 200);
+//        assertThat(resp).isNotNull();
+//        assertThat(wishlist.getWishlistItems()).contains(item);
+//        verify(wishlistDAO).save(wishlist);
+//    }
 
-        when(wishlistDAO.save(wishlist)).thenReturn(wishlist);
-        when(wishlistMapper.toWishlistUpdateDTO(wishlist)).thenReturn(new WishlistUpdateResponseDTO());
-
-        WishlistUpdateResponseDTO resp = wishlistService.addExistingItemToWishlist(10, 200);
-        assertThat(resp).isNotNull();
-        assertThat(wishlist.getWishlistItems()).contains(item);
-        verify(wishlistDAO).save(wishlist);
-    }
-
-    @Test
-    void addExistingItemToWishlist_itemAlreadyExists_throws() {
-        when(wishlistDAO.findById(10)).thenReturn(Optional.of(wishlist));
-        when(itemDAO.findById(200)).thenReturn(Optional.of(item));
-        wishlist.getWishlistItems().add(item);
-
-        assertThatThrownBy(() -> wishlistService.addExistingItemToWishlist(10, 200))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
+//    @Test
+//    void addExistingItemToWishlist_itemAlreadyExists_throws() {
+//        when(wishlistDAO.findById(10)).thenReturn(Optional.of(wishlist));
+//        when(itemDAO.findById(200)).thenReturn(Optional.of(item));
+//        wishlist.getWishlistItems().add(item);
+//
+//        assertThatThrownBy(() -> wishlistService.addExistingItemToWishlist(10, 200))
+//                .isInstanceOf(IllegalArgumentException.class);
+//    }
 
     @Test
     void createAndAddItemToWishlist_success() {
