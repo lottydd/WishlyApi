@@ -20,7 +20,7 @@ public class UserDAO extends BaseDAO<User, Integer> {
         logger.info("Поиск Пользователя по email {}", email);
         try {
             User user = entityManager.createQuery(
-                            "SELECT u FROM User u WHERE u.email = :email", User.class)
+                            "SELECT u FROM User u WHERE u.email = :email", User.class) // User вместо Users
                     .setParameter("email", email)
                     .getSingleResult();
             return Optional.of(user);
@@ -33,7 +33,7 @@ public class UserDAO extends BaseDAO<User, Integer> {
         logger.info("Поиск Пользователя по username {}", username);
         try {
             User user = entityManager.createQuery(
-                            "SELECT u FROM User u WHERE u.username = :username", User.class)
+                            "SELECT u FROM User u WHERE u.username = :username", User.class) // Правильно
                     .setParameter("username", username)
                     .getSingleResult();
             return Optional.of(user);
@@ -43,24 +43,24 @@ public class UserDAO extends BaseDAO<User, Integer> {
     }
 
     public boolean existsByEmail(String email) {
-        Integer count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.email = :email", Integer.class)
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class)
                 .setParameter("email", email)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean existsByUsername(String username) {
-        Integer count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.username = :username", Integer.class)
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.username = :username", Long.class)
                 .setParameter("username", username)
                 .getSingleResult();
         return count > 0;
     }
 
     public boolean existsByEmailOrUsername(String email, String username) {
-        Integer count = entityManager.createQuery(
-                        "SELECT COUNT(u) FROM User u WHERE u.email = :email OR u.username = :username", Integer.class)
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.email = :email OR u.username = :username", Long.class)
                 .setParameter("email", email)
                 .setParameter("username", username)
                 .getSingleResult();

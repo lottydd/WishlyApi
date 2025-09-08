@@ -6,13 +6,10 @@ import com.example.ozon_parser_wishly.service.OzonParserService;
 import com.example.ozon_parser_wishly.service.WildberriesParserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/parse")
+@RequestMapping("/api")
 public class ParserController {
 
     private final OzonParserService ozonParserService;
@@ -25,7 +22,7 @@ public class ParserController {
     }
 
     @GetMapping("/parse")
-    public ResponseEntity<ItemParseResponseDTO> parseProduct(@RequestParam ParseRequestDTO parseRequestDTO) {
+    public ResponseEntity<ItemParseResponseDTO> parseProduct(@RequestBody ParseRequestDTO parseRequestDTO) {
         ItemParseResponseDTO response;
         if (parseRequestDTO.getUrl().contains("ozon.ru")) {
             response = ozonParserService.parseProduct(parseRequestDTO.getUrl());

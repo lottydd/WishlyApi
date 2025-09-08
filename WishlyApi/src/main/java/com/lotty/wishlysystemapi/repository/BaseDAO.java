@@ -43,7 +43,7 @@ public abstract class BaseDAO<T, ID> implements GenericDAO<T, ID> {
     @Override
     public List<T> findAll() {
         logger.info("Получение всех записей сущности {}", entityClass.getSimpleName());
-        String jpql = "SELECT e FROM " + entityClass.getSimpleName() + " e";
+        String jpql = "SELECT e FROM " + entityClass.getName() + " e";
         List<T> result = entityManager.createQuery(jpql, entityClass).getResultList();
         if (result.isEmpty()) {
             logger.error("Не найдено записей сущности {}", entityClass.getSimpleName());

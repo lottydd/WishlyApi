@@ -47,7 +47,7 @@ public class OzonParserService {
             itemParseResponseDTO.setItemName(getText(driver, "div[data-widget='webProductHeading'] h1"));
             itemParseResponseDTO.setImageURL( getMainImage(driver, wait));
             itemParseResponseDTO.setSourceURL(url);
-            itemParseResponseDTO.setPrice(Double.valueOf(getPrice(driver, wait)));
+            itemParseResponseDTO.setPrice(parsePrice(getPrice(driver, wait)));
             itemParseResponseDTO.setDescription(getDescription(driver, wait));
 
         } catch (Exception e) {
@@ -123,7 +123,19 @@ public class OzonParserService {
         return "Не найдена";
     }
 
+    private Double parsePrice(String priceText) {
+        if (priceText == null || priceText.isEmpty()) return null;
 
+        // Убираем все символы, кроме цифр и точки
+        String cleaned = priceText.replaceAll("[^0-9.,]", "").replace(",", ".");
+
+        try {
+            return Double.valueOf(cleaned);
+        } catch (NumberFormatException e) {
+            System.err.println("Ошибка при парсинге цены: " + priceText);
+            return null;
+        }
+    }
 
     private void makeBrowserLookHuman(WebDriver driver) {
         JavascriptExecutor js = (JavascriptExecutor) driver;

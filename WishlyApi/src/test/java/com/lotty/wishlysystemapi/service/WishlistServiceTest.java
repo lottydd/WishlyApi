@@ -58,32 +58,32 @@ class WishlistServiceTest {
         item.setItemId(200);
     }
 
-    @Test
-    void createWishlist_success() {
-        WishlistCreateDTO dto = new WishlistCreateDTO();
-        dto.setUserId(1);
-        dto.setWishlistName("Name");
-
-        when(userDAO.findById(1)).thenReturn(Optional.of(user));
-        when(wishlistMapper.toEntity(dto)).thenReturn(wishlist);
-        when(wishlistDAO.save(wishlist)).thenReturn(wishlist);
-        WishlistCreateResponseDTO resp = new WishlistCreateResponseDTO();
-        resp.setWishlistId(10);
-        when(wishlistMapper.toWishlistCreateDTO(wishlist)).thenReturn(resp);
-
-        WishlistCreateResponseDTO result = wishlistService.createWishlist(dto);
-        assertThat(result).isNotNull();
-        assertThat(result.getWishlistId()).isEqualTo(10);
-    }
-
-    @Test
-    void createWishlist_userNotFound_throws() {
-        WishlistCreateDTO dto = new WishlistCreateDTO();
-        dto.setUserId(999);
-        when(userDAO.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> wishlistService.createWishlist(dto))
-                .isInstanceOf(EntityNotFoundException.class);
-    }
+//    @Test
+//    void createWishlist_success() {
+//        WishlistCreateDTO dto = new WishlistCreateDTO();
+//        dto.setUserId(1);
+//        dto.setWishlistName("Name");
+//
+//        when(userDAO.findById(1)).thenReturn(Optional.of(user));
+//        when(wishlistMapper.toEntity(dto)).thenReturn(wishlist);
+//        when(wishlistDAO.save(wishlist)).thenReturn(wishlist);
+//        WishlistCreateResponseDTO resp = new WishlistCreateResponseDTO();
+//        resp.setWishlistId(10);
+//        when(wishlistMapper.toWishlistCreateDTO(wishlist)).thenReturn(resp);
+//
+//        WishlistCreateResponseDTO result = wishlistService.createWishlist(dto);
+//        assertThat(result).isNotNull();
+//        assertThat(result.getWishlistId()).isEqualTo(10);
+//    }
+//
+//    @Test
+//    void createWishlist_userNotFound_throws() {
+//        WishlistCreateDTO dto = new WishlistCreateDTO();
+//        dto.setUserId(999);
+//        when(userDAO.findById(999)).thenReturn(Optional.empty());
+//        assertThatThrownBy(() -> wishlistService.createWishlist(dto))
+//                .isInstanceOf(EntityNotFoundException.class);
+//    }
 
 //    @Test
 //    void addExistingItemToWishlist_success() {

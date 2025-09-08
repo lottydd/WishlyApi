@@ -14,14 +14,10 @@ public class ParseRequestDTO {
     @NotBlank
     private String url;
 
-    @NotNull
-    // ID пользователя, который отправил запрос (опционально, если нужен для сохранения)
-    private Integer userId;
-
     // ID списка желаемого (wishlist), если нужно знать, куда сохранить результат
     @NotNull
     private Integer wishlistId;
-    @NotNull
+
     private Integer taskId;
 
 }

@@ -33,12 +33,13 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "Пользователь успешно создан"),
             @ApiResponse(responseCode = "400", description = "Некорректные данные")
     })
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<UserCreateResponseDTO> createUser(@RequestBody UserCreateDTO dto) {
         UserCreateResponseDTO response = userService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Получить пользователя по ID")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(
@@ -47,6 +48,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Обновить данные пользователя")
     @PutMapping("/{id}")
     public ResponseEntity<UserUpdateResponseDTO> updateUser(
@@ -56,6 +58,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Изменить пароль пользователя")
     @PutMapping("/{id}/password")
     public ResponseEntity<Void> changePassword(

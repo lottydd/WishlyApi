@@ -7,9 +7,11 @@ import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.mapper.ItemMapper;
 import com.lotty.wishlysystemapi.model.Item;
+import com.lotty.wishlysystemapi.model.ParsingTask;
 import com.lotty.wishlysystemapi.model.User;
 import com.lotty.wishlysystemapi.model.Wishlist;
 import com.lotty.wishlysystemapi.repository.ItemDAO;
+import com.lotty.wishlysystemapi.repository.ParsingTaskDAO;
 import com.lotty.wishlysystemapi.repository.UserDAO;
 import com.lotty.wishlysystemapi.repository.WishlistDAO;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,13 +30,15 @@ public class ItemService {
     private final ItemDAO itemDAO;
     private final UserDAO userDAO;
     private final WishlistDAO wishlistDAO;
+    private final ParsingTaskDAO parsingTaskDAO;
 
     @Autowired
-    public ItemService(ItemMapper itemMapper, ItemDAO itemDAO, UserDAO userDAO, WishlistDAO wishlistDAO) {
+    public ItemService(ItemMapper itemMapper, ItemDAO itemDAO, UserDAO userDAO, WishlistDAO wishlistDAO, ParsingTaskDAO parsingTaskDAO) {
         this.itemMapper = itemMapper;
         this.itemDAO = itemDAO;
         this.userDAO = userDAO;
         this.wishlistDAO = wishlistDAO;
+        this.parsingTaskDAO = parsingTaskDAO;
     }
 
     @Transactional
@@ -54,7 +58,15 @@ public class ItemService {
 
 
     public Item createItemFromParsedData(ItemParseResponseDTO response) {
-        logger.info("Создание item из распарсенных данных для пользователя ID: {}", response.getUserId());
+        logger.info("Создание item из распарсенных данных. Task id: {}", response.getTaskId());
+
+        ParsingTask task = parsingTaskDAO.findById(response.getTaskId())
+                .orElseThrow(() -> {
+                    logger.error("ParsingTask с ID {} не найден", response.getTaskId());
+                    return new EntityNotFoundException("ParsingTask не найден");
+                });
+        User owner = task.getUser();
+
 
         Item item = new Item();
         item.setItemName(response.getItemName());
@@ -62,18 +74,10 @@ public class ItemService {
         item.setPrice(response.getPrice());
         item.setImageURL(response.getImageURL());
         item.setSourceURL(response.getSourceURL());
-
-        // Находим владельца
-        User owner = userDAO.findById(response.getUserId())
-                .orElseThrow(() -> {
-                    logger.error("Пользователь с ID {} не найден", response.getUserId());
-                    return new EntityNotFoundException("Пользователь не найден");
-                });
         item.setOwner(owner);
 
         Item savedItem = itemDAO.save(item);
-        logger.info("Item создан из парсинга с ID: {}", savedItem.getItemId());
-
+        logger.info("Item создан из парсинга с ID: {} для пользователя {}", savedItem.getItemId(), owner.getUsername());
         return savedItem;
     }
 

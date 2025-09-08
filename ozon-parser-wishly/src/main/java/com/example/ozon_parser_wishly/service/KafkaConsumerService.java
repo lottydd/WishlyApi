@@ -28,7 +28,6 @@ public class KafkaConsumerService {
 
             // Добавляем taskId в ответ
             response.setTaskId(request.getTaskId());
-            response.setUserId(request.getUserId());
 
             kafkaTemplate.send("parse-results", response);
         } catch (Exception e) {

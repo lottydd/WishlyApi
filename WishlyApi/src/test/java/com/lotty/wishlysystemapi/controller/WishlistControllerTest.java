@@ -40,7 +40,6 @@ class WishlistControllerTest {
     @BeforeEach
     void setUp() {
         wishlistCreateDTO = new WishlistCreateDTO();
-        wishlistCreateDTO.setUserId(1);
         wishlistCreateDTO.setWishlistName("Test Wishlist");
         wishlistCreateDTO.setWishlistDescription("Test Description");
 

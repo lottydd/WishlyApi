@@ -1,8 +1,8 @@
 INSERT INTO Roles (roleName) VALUES
 ('ROLE_USER'),
-('ROLE_ADMIN'),
+('ROLE_ADMIN');
 
--- Заполнение таблицы Users
+-- Fill Users table
 INSERT INTO Users (username, email, description, password) VALUES
 ('ivan_petrov', 'ivan.petrov@mail.com', 'Regular user interested in technology', 'hashed_password_1'),
 ('anna_sidorova', 'anna.sidorova@mail.com', 'Book lover and collector', 'hashed_password_2'),
@@ -10,8 +10,8 @@ INSERT INTO Users (username, email, description, password) VALUES
 ('maria_ivanova', 'maria.ivanova@mail.com', 'Professional photographer', 'hashed_password_4'),
 ('alexey_fedorov', 'alexey.fedorov@mail.com', 'Software developer and gamer', 'hashed_password_5');
 
--- Заполнение таблицы UserRoles (назначение ролей пользователям)
-INSERT INTO UserRoles (userId, roleId) VALUES
+-- Assign roles to users
+INSERT INTO UserRoles (user_id, role_id) VALUES
 (1, 1),  -- ivan_petrov - User
 (2, 1),  -- anna_sidorova - User
 (3, 1),  -- sergey_kozlov - User
@@ -19,8 +19,8 @@ INSERT INTO UserRoles (userId, roleId) VALUES
 (5, 1),  -- alexey_fedorov - User
 (5, 2);  -- alexey_fedorov - Admin
 
--- Заполнение таблицы Items
-INSERT INTO Items (itemName, description, price, imageUrl, sourceUrl, ownerId) VALUES
+-- Insert items
+INSERT INTO Items (itemName, description, price, imageUrl, sourceUrl, owner_id) VALUES
 ('iPhone 15 Pro', 'Latest Apple smartphone with A17 Pro chip', 999.99, 'https://example.com/iphone15.jpg', 'https://apple.com/iphone', 1),
 ('Sony WH-1000XM5', 'Wireless noise-canceling headphones', 349.99, 'https://example.com/sonyxm5.jpg', 'https://sony.com/headphones', 2),
 ('Kindle Paperwhite', 'E-reader with 6.8" display and backlight', 139.99, 'https://example.com/kindle.jpg', 'https://amazon.com/kindle', 2),
@@ -30,7 +30,7 @@ INSERT INTO Items (itemName, description, price, imageUrl, sourceUrl, ownerId) V
 ('Dyson V15 Detect', 'Cordless vacuum cleaner with laser dust detection', 699.99, 'https://example.com/dyson.jpg', 'https://dyson.com/vacuums', 3),
 ('Rolex Submariner', 'Luxury diving watch with automatic movement', 8999.99, 'https://example.com/rolex.jpg', 'https://rolex.com/watches', 1);
 
--- Заполнение таблицы Wishlists
+-- Create wishlists
 INSERT INTO Wishlists (userId, wishlistName, wishlistDescription, createDate, modifiedDate) VALUES
 (1, 'Tech Wishlist', 'Latest gadgets and electronics', '2024-01-15 10:30:00', '2024-03-20 14:25:00'),
 (2, 'Reading Collection', 'Books and reading devices', '2024-02-01 09:15:00', '2024-03-18 11:40:00'),
@@ -39,7 +39,7 @@ INSERT INTO Wishlists (userId, wishlistName, wishlistDescription, createDate, mo
 (5, 'Gaming Setup', 'Everything for perfect gaming experience', '2024-01-25 11:00:00', '2024-03-22 10:45:00'),
 (2, 'Birthday Wishes', 'Gifts for my birthday', '2024-03-01 08:00:00', '2024-03-15 12:30:00');
 
--- Заполнение таблицы WishlistItems (связь вишлистов с предметами)
+-- Link items to wishlists
 INSERT INTO WishlistItems (wishlistId, itemId) VALUES
 (1, 1),  -- iPhone в Tech Wishlist
 (1, 2),  -- Sony headphones в Tech Wishlist

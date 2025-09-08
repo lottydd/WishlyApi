@@ -19,6 +19,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,19 +48,30 @@ public class WishlistService {
 
     @Transactional
     public WishlistCreateResponseDTO createWishlist(WishlistCreateDTO dto) {
-        logger.info("Создание вишлиста для пользователя ID: {}", dto.getUserId());
-        User user = userDAO.findById(dto.getUserId())
+
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("Authorities: {}", auth.getAuthorities());
+
+        String username = auth.getName();
+
+        logger.info("Создание вишлиста для пользователя {}", username);
+
+        User user = userDAO.findByUsername(username)
                 .orElseThrow(() -> {
-                    logger.error("Пользователь с ID {} не найден при создании вишлиста", dto.getUserId());
-                    return new EntityNotFoundException("Юзер не найден");
+                    logger.error("Пользователь {} не найден при создании вишлиста", username);
+                    return new EntityNotFoundException("Пользователь не найден");
                 });
 
         Wishlist wishlist = wishlistMapper.toEntity(dto);
         wishlist.setUser(user);
         wishlist.setCreateDate(LocalDateTime.now());
         wishlist.setModifiedDate(LocalDateTime.now());
+
         Wishlist savedWishlist = wishlistDAO.save(wishlist);
-        logger.info("Вишлист успешно создан с ID: {}", savedWishlist.getWishlistId());
+
+        logger.info("Вишлист успешно создан с ID: {} для пользователя {}", savedWishlist.getWishlistId(), username);
+
         return wishlistMapper.toWishlistCreateDTO(savedWishlist);
     }
 

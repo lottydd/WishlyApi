@@ -7,6 +7,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Service
 public class WildberriesParserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(WildberriesParserService.class);
 
     public ItemParseResponseDTO parseProduct(String url) {
         ChromeOptions options = new ChromeOptions();
@@ -39,11 +43,11 @@ public class WildberriesParserService {
                     ((JavascriptExecutor) d).executeScript("return document.querySelector('h1') !== null").equals(true)
             );
 
-            itemParseResponseDTO.setDescription(getText(driver, "h1"));
-            itemParseResponseDTO.setItemName(getDescription(driver));
-            itemParseResponseDTO.setSourceURL(url);
-            itemParseResponseDTO.setPrice(Double.valueOf(getPrice(driver)));
+            itemParseResponseDTO.setItemName(getItemName(driver));
             itemParseResponseDTO.setImageURL(getMainImage(driver));
+            itemParseResponseDTO.setSourceURL(url);
+            itemParseResponseDTO.setDescription(getDescription(driver));
+            itemParseResponseDTO.setPrice(getPrice(driver));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,93 +71,91 @@ public class WildberriesParserService {
     private void humanScroll(WebDriver driver) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         for (int i = 0; i < 5; i++) {
-            int scrollAmount = 200 + (int)(Math.random() * 300);
+            int scrollAmount = 200 + (int) (Math.random() * 300);
             js.executeScript("window.scrollBy(0, arguments[0]);", scrollAmount);
-            try { Thread.sleep(300 + (int)(Math.random() * 700)); } catch (InterruptedException ignored) {}
+            try {
+                Thread.sleep(300 + (int) (Math.random() * 700));
+            } catch (InterruptedException ignored) {
+            }
         }
         js.executeScript("window.scrollTo(0, 0);");
 
     }
 
 
+    private String getItemName(WebDriver driver) {
+        try {
+            WebElement nameEl = driver.findElement(By.cssSelector("h1.productTitle--J2W7I"));
+            return nameEl.getText().trim();
+        } catch (NoSuchElementException e) {
+            return "Название не найдено";
+        }
+    }
 
+    // --- описание ---
     private String getDescription(WebDriver driver) {
         try {
-            // Находим кнопку "Характеристики и описание"
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-            WebElement detailsBtn = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.cssSelector("button.j-details-btn-desktop")));
 
-            // Кликаем по кнопке, чтобы раскрыть блок
-            detailsBtn.click();
+            // жмём на кнопку "Характеристики и описание"
+            WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("button.btnDetail--im7UR")));
+            btn.click();
 
-            // Ждем, пока появится блок с описанием
-            WebElement descSection = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("section.product-details__description p.option__text")));
+            // ждём появления блока с описанием
+            WebElement desc = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("p.descriptionText--Jq9n2")));
 
-            return descSection.getText().trim();
-
+            return desc.getText().trim();
         } catch (TimeoutException | NoSuchElementException e) {
             return "Описание не найдено";
         }
     }
 
-
-    private String getText(WebDriver driver, String selector) {
+    // --- цена ---
+    private Double getPrice(WebDriver driver) {
         try {
-            return driver.findElement(By.cssSelector(selector)).getText();
-        } catch (NoSuchElementException e) {
-            return "Не найден";
-        }
-    }
-
-    private List<String> getAllImages(WebDriver driver) {
-        List<String> images = new ArrayList<>();
-        List<WebElement> imgElements = driver.findElements(By.cssSelector("img.photo-zoom__preview.j-zoom-image"));
-
-        for (WebElement img : imgElements) {
-            String src = img.getAttribute("src");
-            if (src != null && !src.isEmpty()) {
-                images.add(src);
-            }
-        }
-        return images;
-    }
-
-    private String getMainImage(WebDriver driver) {
-        List<String> images = getAllImages(driver);
-        return images.isEmpty() ? null : images.get(0);
-    }
-
-    private String getPrice(WebDriver driver) {
-        try {
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-
-            // Ждем, пока один из вариантов цены появится в DOM
-            for (int i = 0; i < 10; i++) {
-                Object finalPrice = js.executeScript(
-                        "return document.querySelector('ins.price-block__final-price.wallet')?.innerText || " +
-                                "document.querySelector('span.price-block__wallet-price.red-price')?.innerText || null;"
-                );
-
-                if (finalPrice != null && !finalPrice.toString().isEmpty()) {
-                    String priceText = finalPrice.toString().replaceAll("[^0-9]", "");
-                    if (!priceText.isEmpty()) return priceText + " ₽";
+            // Сначала ищем "кошелек" — акционная цена
+            List<WebElement> walletPriceElems = driver.findElements(By.cssSelector("span.priceBlockWalletPrice--RJGuT"));
+            for (WebElement el : walletPriceElems) {
+                String priceText = el.getText().replaceAll("[^0-9]", "");
+                if (!priceText.isEmpty()) {
+                    logger.info("Wallet price digits only: '{}'", priceText);
+                    return Double.valueOf(priceText);
                 }
-
-                Thread.sleep(500); // ждем полсекунды и повторяем
             }
 
-            // fallback: старая цена
-            WebElement oldPrice = driver.findElement(By.cssSelector("del.price-block__old-price span"));
-            String priceText = oldPrice.getText().replaceAll("[^0-9]", "");
-            if (!priceText.isEmpty()) return priceText + " ₽";
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (NoSuchElementException ignored) {}
-
-        return "Не найдена";
+            // Если цены кошелька нет, берём финальную цену
+            List<WebElement> finalPriceElems = driver.findElements(By.cssSelector("ins.priceBlockFinalPrice--iToZR"));
+            for (WebElement el : finalPriceElems) {
+                String priceText = el.getText().replaceAll("[^0-9]", "");
+                if (!priceText.isEmpty()) {
+                    logger.info("Final price digits only: '{}'", priceText);
+                    return Double.valueOf(priceText);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error while parsing price", e);
+        }
+        return null;
     }
 
+
+
+
+
+
+
+
+    // --- картинка ---
+    private String getMainImage(WebDriver driver) {
+        try {
+            WebElement img = driver.findElement(By.cssSelector("div.imageContainer--TnaxW img"));
+            String src = img.getAttribute("src");
+            return (src != null && !src.isEmpty()) ? src : null;
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+
+    }
 }

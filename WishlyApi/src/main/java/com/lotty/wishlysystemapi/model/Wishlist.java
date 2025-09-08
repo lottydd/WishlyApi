@@ -20,7 +20,7 @@ public class Wishlist {
     private Integer wishlistId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     @Column(nullable = false)
@@ -31,8 +31,8 @@ public class Wishlist {
     @ManyToMany
     @JoinTable(
             name = "WishlistItems",
-            joinColumns = @JoinColumn(name = "wishlist_id"),
-            inverseJoinColumns = @JoinColumn(name = "item_id")
+            joinColumns = @JoinColumn(name = "wishlistId"),
+            inverseJoinColumns = @JoinColumn(name = "itemId")
     )
     private List<Item> wishlistItems = new ArrayList<>();
 

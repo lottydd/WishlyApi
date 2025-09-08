@@ -93,6 +93,14 @@ public class UserService {
 
     }
 
+    @Transactional(readOnly = true)
+    public User findByUsername(String username) {
+        return userDAO.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
+    }
+
+
+
 
     @Transactional
     public UserUpdateResponseDTO deleteRoleFromUser(int userId, String roleName) {
