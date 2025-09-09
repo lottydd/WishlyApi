@@ -39,7 +39,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                 .collect(Collectors.toList());
-
         logger.info("Пользователь '{}' найден, количество ролей: {}", username, authorities.size());
         return new CustomUserDetails(
                 user.getUserId(),

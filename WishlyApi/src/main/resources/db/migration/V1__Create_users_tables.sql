@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS Users(
 
 -- UserRoles
 CREATE TABLE IF NOT EXISTS UserRoles(
-    user_id INT REFERENCES Users(id) ON DELETE CASCADE,
-    role_id INT REFERENCES Roles(id) ON DELETE CASCADE,
+    user_id INT REFERENCES Users(userId) ON DELETE CASCADE,
+    role_id INT REFERENCES Roles(roleId) ON DELETE CASCADE,
     PRIMARY KEY (user_id, role_id)
 
 );

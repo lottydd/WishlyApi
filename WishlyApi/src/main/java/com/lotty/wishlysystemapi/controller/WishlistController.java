@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class WishlistController {
     }
 
     @Operation(summary = "Создать новый вишлист")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<WishlistCreateResponseDTO> createWishlist(@RequestBody WishlistCreateDTO dto) {
         WishlistCreateResponseDTO response = wishlistService.createWishlist(dto);
@@ -35,6 +37,7 @@ public class WishlistController {
 
     @Operation(summary = "Получить все вишлисты пользователя")
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<WishlistResponseDTO>> getUserWishlists(
             @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
         List<WishlistResponseDTO> response = wishlistService.getUserWishlists(userId);
@@ -43,6 +46,7 @@ public class WishlistController {
 
     @Operation(summary = "Получить вишлист по ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<WishlistResponseDTO> getWishlistById(
             @Parameter(description = "ID вишлиста") @PathVariable Integer id) {
         WishlistResponseDTO response = wishlistService.getWishlistById(id);
@@ -51,6 +55,7 @@ public class WishlistController {
 
     @Operation(summary = "Обновить вишлист")
     @PutMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<WishlistUpdateResponseDTO> updateWishlist(@RequestBody WishlistUpdateDTO dto) {
         WishlistUpdateResponseDTO response = wishlistService.updateWishlist(dto);
         return ResponseEntity.ok(response);
@@ -58,6 +63,7 @@ public class WishlistController {
 
     @Operation(summary = "Удалить вишлист")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Void> deleteWishlist(@Parameter(description = "ID вишлиста") @PathVariable Integer id) {
         wishlistService.deleteWishlist(id);
         return ResponseEntity.noContent().build();

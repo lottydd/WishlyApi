@@ -1,4 +1,5 @@
-package com.example.ozon_parser_wishly.dto.response;
+
+package com.example.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,11 @@ public class ItemParseResponseDTO {
     @Schema(description = "Источник вещи", example = "http://store.com/item/123")
     private String sourceURL;
 
+
+    private Integer taskId;
+
+    private String errorMessage;
+
+    private Integer wishlistId;
 
 }

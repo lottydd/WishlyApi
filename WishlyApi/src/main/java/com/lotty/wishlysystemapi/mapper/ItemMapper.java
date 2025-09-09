@@ -24,9 +24,9 @@ public interface ItemMapper {
     Item toEntity(AddItemToWishlistDTO dto);
 
 
-    @Mapping(target = "itemId", ignore = true) // ID не обновляем!
-    @Mapping(target = "owner", ignore = true) // Владельца не меняем!
-    @Mapping(target = "inWishlists", ignore = true) // Списки не меняем!
+    @Mapping(target = "itemId", ignore = true)
+    @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "inWishlists", ignore = true)
     void updateItemFromDTO(UpdateItemDTO dto, @MappingTarget Item item);
 
     ItemCreateResponseDTO toItemCreateResponseDTO (Item item);

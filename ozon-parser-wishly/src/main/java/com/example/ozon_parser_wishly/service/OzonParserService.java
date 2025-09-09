@@ -1,8 +1,9 @@
 package com.example.ozon_parser_wishly.service;
 
-import com.example.ozon_parser_wishly.dto.response.ItemParseResponseDTO;
+import com.example.common.dto.ItemParseResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -17,12 +18,13 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class OzonParserService {
 
     public ItemParseResponseDTO parseProduct(String url) {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new"); // headless режим
+        options.addArguments("--headless=new");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--disable-gpu", "--no-sandbox");
         options.addArguments("--disable-blink-features=AutomationControlled");
@@ -33,46 +35,47 @@ public class OzonParserService {
         WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
-        ItemParseResponseDTO itemParseResponseDTO = new ItemParseResponseDTO();
+        ItemParseResponseDTO dto = new ItemParseResponseDTO();
 
         try {
+            log.info("Начинаем парсинг товара по URL: {}", url);
             driver.get(url);
+
             makeBrowserLookHuman(driver);
             humanScroll(driver);
+
             wait.until((ExpectedCondition<Boolean>) d ->
                     ((JavascriptExecutor) d).executeScript(
                             "return document.querySelector('div[data-widget=\"webProductHeading\"] h1') !== null"
                     ).equals(true)
             );
-            itemParseResponseDTO.setItemName(getText(driver, "div[data-widget='webProductHeading'] h1"));
-            itemParseResponseDTO.setImageURL( getMainImage(driver, wait));
-            itemParseResponseDTO.setSourceURL(url);
-            itemParseResponseDTO.setPrice(Double.valueOf(getPrice(driver, wait)));
-            itemParseResponseDTO.setDescription(getDescription(driver, wait));
 
+            dto.setItemName(getText(driver, "div[data-widget='webProductHeading'] h1"));
+            dto.setImageURL(getMainImage(driver, wait));
+            dto.setSourceURL(url);
+            dto.setPrice(parsePrice(getPrice(driver, wait)));
+            dto.setDescription(getDescription(driver, wait));
+
+            log.info("Парсинг завершен: {}", dto);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Ошибка при парсинге товара с URL: {}", url, e);
         } finally {
             driver.quit();
+            log.debug("ChromeDriver закрыт");
         }
-        return itemParseResponseDTO;
+        return dto;
     }
 
     private String getPrice(WebDriver driver, WebDriverWait wait) {
         try {
-            // 1. Ожидаем появления блока с ценой
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[data-widget='webPrice']")),
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("span[class*='tsHeadline']"))
             ));
 
-            // 2. Пробуем разные стратегии извлечения цены в порядке приоритета
             List<String> priceSelectors = Arrays.asList(
-                    // Основная цена (обычная)
                     "div[data-widget='webPrice'] span.tsHeadline500Medium",
-                    // Цена со скидкой (первая цена)
                     "div[data-widget='webPrice'] span.tsHeadline600Large",
-                    // Альтернативные селекторы
                     "span.tsHeadline500Medium",
                     "span[class*='price']",
                     "div[class*='price']"
@@ -80,73 +83,79 @@ public class OzonParserService {
 
             for (String selector : priceSelectors) {
                 try {
-                    WebElement priceElement = driver.findElement(By.cssSelector(selector));
-                    String priceText = priceElement.getText().trim();
+                    WebElement el = driver.findElement(By.cssSelector(selector));
+                    String text = el.getText().trim();
 
-                    if (!priceText.isEmpty() && priceText.matches(".*[0-9].*")) {
-                        // Очищаем цену от лишних символов
-                        return priceText.replaceAll("[^0-9 ₽]", "").replace(" ", " ");
+                    if (!text.isEmpty() && text.matches(".*[0-9].*")) {
+                        log.debug("Цена найдена по селектору {}: {}", selector, text);
+                        return text.replaceAll("[^0-9 ₽]", "").replace(" ", " ");
                     }
-                } catch (NoSuchElementException e) {
-                    continue;
+                } catch (NoSuchElementException ignored) {
                 }
             }
 
-            // 3. Если не нашли через CSS, пробуем XPath
             try {
-                WebElement priceElement = driver.findElement(
+                WebElement el = driver.findElement(
                         By.xpath("//span[contains(@class, 'tsHeadline') and contains(text(), '₽')]"));
-                return priceElement.getText().trim();
-            } catch (NoSuchElementException e) {
-                // Продолжаем
+                return el.getText().trim();
+            } catch (NoSuchElementException ignored) {
+
             }
 
-            // 4. Пробуем извлечь из JSON-LD
             try {
-                String jsonData = (String)((JavascriptExecutor)driver).executeScript(
+                String jsonData = (String) ((JavascriptExecutor) driver).executeScript(
                         "return document.querySelector('script[type=\"application/ld+json\"]')?.innerText"
                 );
-
                 if (jsonData != null) {
                     JsonNode jsonNode = new ObjectMapper().readTree(jsonData);
                     if (jsonNode.has("offers") && jsonNode.get("offers").has("price")) {
                         return jsonNode.get("offers").get("price").asText() + " ₽";
                     }
                 }
-            } catch (Exception e) {
-                // Не удалось получить данные из JSON
+            } catch (Exception ignored) {
             }
-
         } catch (Exception e) {
-            System.err.println("Ошибка при получении цены: " + e.getMessage());
+            log.warn("Ошибка при получении цены: {}", e.getMessage());
         }
         return "Не найдена";
     }
 
+    private Double parsePrice(String priceText) {
+        if (priceText == null || priceText.isEmpty()) return null;
 
+        String cleaned = priceText.replaceAll("[^0-9.,]", "").replace(",", ".");
+        try {
+            return Double.valueOf(cleaned);
+        } catch (NumberFormatException e) {
+            log.warn("Ошибка при парсинге цены: {}", priceText);
+            return null;
+        }
+    }
 
     private void makeBrowserLookHuman(WebDriver driver) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript(
+        ((JavascriptExecutor) driver).executeScript(
                 "Object.defineProperty(navigator, 'webdriver', {get: () => false});" +
                         "window.chrome = { runtime: {} };" +
                         "Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});" +
                         "Object.defineProperty(navigator, 'languages', {get: () => ['en-US','en']});"
         );
+        log.debug("Anti-bot скрипты применены");
     }
 
     private void humanScroll(WebDriver driver) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
         for (int i = 0; i < 5; i++) {
-            int scrollAmount = 200 + random.nextInt(300);
-            js.executeScript("window.scrollBy(0, arguments[0]);", scrollAmount);
+            int amount = 200 + rnd.nextInt(300);
+            js.executeScript("window.scrollBy(0, arguments[0]);", amount);
             try {
-                Thread.sleep(300 + random.nextInt(700));
-            } catch (InterruptedException ignored) {}
+                Thread.sleep(300 + rnd.nextInt(700));
+            } catch (InterruptedException ignored) {
+            }
         }
         js.executeScript("window.scrollTo(0, 0);");
+        log.debug("Эмуляция скролла завершена");
     }
 
     private String getText(WebDriver driver, String selector) {
@@ -161,19 +170,16 @@ public class OzonParserService {
         }
     }
 
-
     private String getMainImage(WebDriver driver, WebDriverWait wait) {
         try {
-            // 1. Ожидаем загрузки главного изображения
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[data-widget='webGallery'] img")),
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("img[elementtiming^='lcp_eltiming_webGallery']")),
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("img[src*='multimedia'][loading='eager']"))
             ));
 
-            // 2. Пробуем найти главное изображение через разные селекторы
             List<String> selectors = Arrays.asList(
-                    "img[elementtiming^='lcp_eltiming_webGallery']", // Самый приоритетный
+                    "img[elementtiming^='lcp_eltiming_webGallery']",
                     "div[data-widget='webGallery'] img:first-child",
                     "img[loading='eager'][src*='multimedia']",
                     "img[fetchpriority='high'][src*='multimedia']"
@@ -182,87 +188,68 @@ public class OzonParserService {
             for (String selector : selectors) {
                 try {
                     WebElement img = driver.findElement(By.cssSelector(selector));
-                    String src = img.getAttribute("src");
-                    if (src == null || src.isEmpty()) {
-                        src = img.getAttribute("data-src");
-                    }
+                    String src = Optional.ofNullable(img.getAttribute("src"))
+                            .orElse(img.getAttribute("data-src"));
 
                     if (src != null && !src.isEmpty()) {
-                        // Преобразуем URL для получения высокого разрешения
                         String highResUrl = src.replaceAll("/wc\\d+/", "/wc1000/");
-
-                        // Проверяем, что это действительно изображение товара
                         if (highResUrl.contains("multimedia") && highResUrl.contains("/wc1000/")) {
                             return highResUrl;
                         }
                     }
-                } catch (NoSuchElementException e) {
-                    continue;
+                } catch (NoSuchElementException ignored) {
                 }
             }
 
-            // 3. Если не нашли через селекторы, пробуем извлечь из JSON-LD
             try {
-                String jsonData = (String)((JavascriptExecutor)driver).executeScript(
+                String jsonData = (String) ((JavascriptExecutor) driver).executeScript(
                         "return document.querySelector('script[type=\"application/ld+json\"]')?.innerText"
                 );
 
                 if (jsonData != null) {
                     JsonNode jsonNode = new ObjectMapper().readTree(jsonData);
                     if (jsonNode.has("image")) {
-                        String mainImage = jsonNode.get("image").asText();
-                        return mainImage.replaceAll("/wc\\d+/", "/wc1000/");
+                        return jsonNode.get("image").asText().replaceAll("/wc\\d+/", "/wc1000/");
                     }
                 }
-            } catch (Exception e) {
-                // Не удалось получить данные из JSON
+            } catch (Exception ignored) {
             }
 
         } catch (Exception e) {
-            System.err.println("Ошибка при получении главного изображения: " + e.getMessage());
+            log.warn("Ошибка при получении главного изображения: {}", e.getMessage());
         }
-
-        // 4. Если ничего не нашли, возвращаем null или URL по умолчанию
         return null;
     }
 
     private List<String> getAllImages(WebDriver driver, WebDriverWait wait) {
         List<String> images = new ArrayList<>();
-
         try {
-            // 1. Ожидаем загрузки галереи (используем несколько возможных селекторов)
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[data-widget='webGallery']")),
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[class*='gallery']")),
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector("img[src*='multimedia']"))
             ));
 
-            // 2. Прокручиваем до галереи для активации lazy-load
-            ((JavascriptExecutor)driver).executeScript(
+            ((JavascriptExecutor) driver).executeScript(
                     "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
                     driver.findElement(By.cssSelector("div[data-widget='webGallery'], div[class*='gallery']"))
             );
-            Thread.sleep(1000); // Даем время для подгрузки
+            Thread.sleep(1000);
 
-            // 3. Собираем все возможные элементы изображений
-            List<WebElement> imgElements = driver.findElements(By.cssSelector(
+            List<WebElement> elements = driver.findElements(By.cssSelector(
                     "div[data-widget='webGallery'] img, " +
                             "div[class*='gallery'] img, " +
                             "img[src*='multimedia'], " +
                             "img[elementtiming^='lcp_eltiming_webGallery']"
             ));
 
-            // 4. Обрабатываем каждый элемент
-            for (WebElement img : imgElements) {
+            for (WebElement img : elements) {
                 try {
-                    String src = img.getAttribute("src");
-                    if (src == null || src.isEmpty()) {
-                        src = img.getAttribute("data-src"); // Проверяем data-src для lazy-load
-                    }
+                    String src = Optional.ofNullable(img.getAttribute("src"))
+                            .orElse(img.getAttribute("data-src"));
 
                     if (src != null && !src.isEmpty()) {
-                        // Преобразуем URL для получения максимального качества
-                        String highResImage = src
+                        String highRes = src
                                 .replace("/wc50/", "/wc1000/")
                                 .replace("/wc100/", "/wc1000/")
                                 .replace("/wc250/", "/wc1000/")
@@ -270,41 +257,35 @@ public class OzonParserService {
                                 .replace("/wc700/", "/wc1000/")
                                 .replace("/thumbnail/", "/original/");
 
-                        // Проверяем, что это изображение товара (не логотип и т.д.)
-                        if (highResImage.contains("multimedia") &&
-                                !highResImage.contains("logo") &&
-                                !images.contains(highResImage)) {
-                            images.add(highResImage);
+                        if (highRes.contains("multimedia")
+                                && !highRes.contains("logo")
+                                && !images.contains(highRes)) {
+                            images.add(highRes);
                         }
                     }
-                } catch (StaleElementReferenceException e) {
-                    continue; // Пропускаем устаревшие элементы
+                } catch (StaleElementReferenceException ignored) {
                 }
             }
 
-            // 5. Если изображений нет, пробуем альтернативный метод через API
             if (images.isEmpty()) {
                 try {
-                    String jsonData = (String)((JavascriptExecutor)driver).executeScript(
+                    String jsonData = (String) ((JavascriptExecutor) driver).executeScript(
                             "return document.querySelector('script[type=\"application/ld+json\"]')?.innerText"
                     );
 
                     if (jsonData != null) {
                         JsonNode jsonNode = new ObjectMapper().readTree(jsonData);
                         if (jsonNode.has("image")) {
-                            String mainImage = jsonNode.get("image").asText();
-                            images.add(mainImage.replace("/wc50/", "/wc1000/"));
+                            images.add(jsonNode.get("image").asText().replace("/wc50/", "/wc1000/"));
                         }
                     }
-                } catch (Exception e) {
-                    // Не удалось получить данные из JSON
+                } catch (Exception ignored) {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Ошибка при получении изображений: " + e.getMessage());
+            log.warn("Ошибка при получении изображений: {}", e.getMessage());
         }
 
-        // 6. Удаляем дубликаты и возвращаем результат
         return images.stream().distinct().collect(Collectors.toList());
     }
 
@@ -312,15 +293,15 @@ public class OzonParserService {
         try {
             By showMoreBtn = By.xpath("//button[contains(., 'Показать полностью')]");
             if (!driver.findElements(showMoreBtn).isEmpty()) {
-                WebElement button = driver.findElement(showMoreBtn);
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", button);
-                wait.until(ExpectedConditions.invisibilityOf(button));
+                WebElement btn = driver.findElement(showMoreBtn);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+                wait.until(ExpectedConditions.invisibilityOf(btn));
             }
 
-            WebElement descBlock = driver.findElement(By.cssSelector("div[data-widget='webDescription']"));
-            return descBlock.getText().trim();
-
+            WebElement block = driver.findElement(By.cssSelector("div[data-widget='webDescription']"));
+            return block.getText().trim();
         } catch (Exception e) {
+            log.debug("Описание не найдено");
             return "Не найден";
         }
     }

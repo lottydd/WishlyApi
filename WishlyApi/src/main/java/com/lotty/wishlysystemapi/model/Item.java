@@ -19,6 +19,7 @@ import java.util.List;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "itemId")
     private Integer itemId;
 
     @Column(nullable = false)

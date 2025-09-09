@@ -25,6 +25,6 @@ public class UserUpdateDTO {
     @Email
     private String email;
 
-    @Schema(description = "Описание пользователя", example = "Люблю писать вишлисты")
+    @Schema(description = "Описание пользователя", example = "Люблю делать атмосферные подборки вещей")
     private String description;
 }

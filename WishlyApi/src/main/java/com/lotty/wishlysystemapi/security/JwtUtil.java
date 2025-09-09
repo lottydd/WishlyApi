@@ -1,6 +1,5 @@
 package com.lotty.wishlysystemapi.security;
 
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

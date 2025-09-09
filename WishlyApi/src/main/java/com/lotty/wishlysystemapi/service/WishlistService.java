@@ -19,6 +19,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,11 +48,17 @@ public class WishlistService {
 
     @Transactional
     public WishlistCreateResponseDTO createWishlist(WishlistCreateDTO dto) {
-        logger.info("Создание вишлиста для пользователя ID: {}", dto.getUserId());
-        User user = userDAO.findById(dto.getUserId())
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("Authorities: {}", auth.getAuthorities());
+
+        String username = auth.getName();
+        logger.info("Создание вишлиста для пользователя {}", username);
+
+        User user = userDAO.findByUsername(username)
                 .orElseThrow(() -> {
-                    logger.error("Пользователь с ID {} не найден при создании вишлиста", dto.getUserId());
-                    return new EntityNotFoundException("Юзер не найден");
+                    logger.error("Пользователь {} не найден при создании вишлиста", username);
+                    return new EntityNotFoundException("Пользователь не найден");
                 });
 
         Wishlist wishlist = wishlistMapper.toEntity(dto);
@@ -58,30 +66,27 @@ public class WishlistService {
         wishlist.setCreateDate(LocalDateTime.now());
         wishlist.setModifiedDate(LocalDateTime.now());
         Wishlist savedWishlist = wishlistDAO.save(wishlist);
-        logger.info("Вишлист успешно создан с ID: {}", savedWishlist.getWishlistId());
+
+        logger.info("Вишлист успешно создан с ID: {} для пользователя {}", savedWishlist.getWishlistId(), username);
         return wishlistMapper.toWishlistCreateDTO(savedWishlist);
     }
 
     @Transactional
-    public WishlistUpdateResponseDTO addExistingItemToWishlist(Integer wishlistId, Integer itemId) {
+    public void addExistingItemToWishlist(Integer wishlistId, Item item ) {
         Wishlist wishlist = wishlistDAO.findById(wishlistId)
                 .orElseThrow(() -> new EntityNotFoundException("Вишлист не найден"));
-
-        Item item = itemDAO.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Айтем для добавления не существует"));
-
         if (!wishlist.getWishlistItems().contains(item)) {
             wishlist.getWishlistItems().add(item);
             wishlist.setModifiedDate(LocalDateTime.now());
             wishlistDAO.save(wishlist);
-            logger.info("Айтем с ID {} успешно добавлен в вишлист {}", itemId, wishlistId);
+            logger.info("Айтем с ID {} успешно добавлен в вишлист {}", item.getItemId(), wishlistId);
         } else {
-            logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", itemId, wishlistId);
+            logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", item.getItemId(), wishlistId);
             throw new IllegalArgumentException(
-                    String.format("Айтем с ID %d уже содержится в вишлисте %d", itemId, wishlistId)
+                    String.format("Айтем с ID %d уже содержится в вишлисте %d", item.getItemId(), wishlistId)
             );
         }
-        return wishlistMapper.toWishlistUpdateDTO(wishlist);
+        wishlistMapper.toWishlistUpdateDTO(wishlist);
     }
 
     @Transactional
@@ -174,7 +179,6 @@ public class WishlistService {
                     logger.error("Вишлист с ID {} не найден", wishlistId);
                     return new EntityNotFoundException("Вишлист не найден");
                 });
-
         return wishlistMapper.toWishlistDTO(wishlist);
     }
 }

@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS Items (
     price NUMERIC(12,2) NOT NULL,
     imageUrl VARCHAR(255),
     sourceUrl VARCHAR(255) NOT NULL,
-    ownerId INT NOT NULL,
-    CONSTRAINT fk_items_owner FOREIGN KEY (ownerId) REFERENCES Users(userId) ON DELETE CASCADE
-    );
+    owner_id INT NOT NULL,
+ CONSTRAINT fk_items_owner FOREIGN KEY (owner_id) REFERENCES Users(userId) ON DELETE CASCADE
+);

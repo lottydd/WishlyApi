@@ -1,8 +1,10 @@
 package com.lotty.wishlysystemapi.dto.response.wishlist;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import lombok.Data;
 
+import java.time.LocalDateTime;
+@Data
 @Schema(description = "Ответ при создании вишлиста")
 public class WishlistCreateResponseDTO {
     @Schema(description = "ID вишлиста", example = "101")

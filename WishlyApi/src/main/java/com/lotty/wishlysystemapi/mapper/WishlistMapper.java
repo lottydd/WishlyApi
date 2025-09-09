@@ -13,12 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-
 public interface WishlistMapper {
 
-    @Mapping(target = "wishlistId", ignore = true) // генерируется БД
-    @Mapping(target = "user", ignore = true)       // установим вручную
-    @Mapping(target = "wishlistItems", ignore = true)  // пустой при создании
+    @Mapping(target = "wishlistId", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "wishlistItems", ignore = true)
     @Mapping(target = "createDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "modifiedDate", expression = "java(java.time.LocalDateTime.now())")
     Wishlist toEntity(WishlistCreateDTO dto);
@@ -28,12 +27,10 @@ public interface WishlistMapper {
     @Mapping(target = "itemCount", expression = "java(wishlist.getItemCount())")
     WishlistUpdateResponseDTO toWishlistUpdateDTO(Wishlist wishlist);
 
-
-    @Mapping(target = "userId", source = "user.userId")
     @Mapping(target = "itemCount", expression = "java(wishlist.getItemCount())")
     WishlistResponseDTO toWishlistDTO(Wishlist wishlist);
 
-   default List<WishlistResponseDTO> toWishlistResponseDTOList(List<Wishlist> wishlists) {
+    default List<WishlistResponseDTO> toWishlistResponseDTOList(List<Wishlist> wishlists) {
         if (wishlists == null) {
             return Collections.emptyList();
         }
