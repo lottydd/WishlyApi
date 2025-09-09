@@ -86,31 +86,13 @@ public class UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
-    @Transactional(readOnly = true)
-    public User findUserByIdForTask(Integer userId) {
-        logger.info("Поиск пользователя по ID. UserID: {}", userId);
-        return  findUserByIdOrThrow(userId);
-
-    }
-
-    @Transactional(readOnly = true)
-    public User findByUsername(String username) {
-        return userDAO.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
-    }
-
-
-
-
     @Transactional
     public UserUpdateResponseDTO deleteRoleFromUser(int userId, String roleName) {
         logger.info("Попытка удаления роли у пользователя. UserID: {}, Role: {}", userId, roleName);
 
         User user = findUserByIdOrThrow(userId);
         Role role = findRoleByNameOrThrow(roleName);
-
         validateRoleAssigned(user, role);
-
         user.getRoles().remove(role);
         userDAO.save(user);
 
@@ -121,9 +103,11 @@ public class UserService {
     @Transactional
     public void changePassword(int userId, String newPassword) {
         logger.info("Попытка смены пароля для пользователя ID: {}", userId);
+
         User user = findUserByIdOrThrow(userId);
         user.setPassword(passwordEncoder.encode(newPassword));
         userDAO.save(user);
+
         logger.info("Пароль успешно изменен для пользователя ID: {}", userId);
     }
 
@@ -132,10 +116,8 @@ public class UserService {
         logger.info("Попытка обновления пользователя. UserID: {}", userId);
 
         validateUpdateData(userUpdateDTO, userId);
-
         User user = findUserByIdOrThrow(userId);
         userMapper.updateUserFromDto(userUpdateDTO, user);
-
         User updatedUser = userDAO.save(user);
 
         logger.info("Данные пользователя обновлены. UserID: {}", userId);
@@ -147,6 +129,7 @@ public class UserService {
         logger.info("Получение списка айтемов для пользователя ID: {}", userId);
         User user = findUserByIdOrThrow(userId);
         List<ItemResponseDTO> items = itemMapper.toItemResponseDTOList(user.getOwnedItems());
+
         if (items.isEmpty()) {
             logger.warn("У пользователя ID {} нет айтемов", userId);
         } else {
@@ -188,7 +171,6 @@ public class UserService {
             logger.error("Username уже занят. Username: {}", dto.getUsername());
             throw new IllegalArgumentException("Username уже занят");
         }
-
         logger.info("Данные регистрации валидны");
     }
 
@@ -213,7 +195,6 @@ public class UserService {
                     logger.error("Username уже занят другим пользователем. Username: {}", dto.getUsername());
                     throw new IllegalArgumentException("Username уже занят другим пользователем");
                 });
-
         logger.info("Данные обновления валидны");
     }
 
@@ -231,4 +212,21 @@ public class UserService {
             throw new IllegalArgumentException("У пользователя нет такой роли");
         }
     }
+
+    @Transactional(readOnly = true)
+    public User findUserByIdForTask(Integer userId) {
+        logger.info("Поиск пользователя по  ID. UserID: {}", userId);
+        return  findUserByIdOrThrow(userId);
+
+    }
+
+    @Transactional(readOnly = true)
+    public User findByUsername(String username) {
+        logger.info("Поиск пользователя по Username. Username: {}", username);
+
+        return userDAO.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
+    }
+
+
 }

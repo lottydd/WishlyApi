@@ -49,9 +49,11 @@ public class ItemService {
                     logger.error("Пользователь с ID {} не найден", dto.getUserId());
                     return new EntityNotFoundException("Пользователь не найден");
                 });
+
         Item item = itemMapper.toEntity(dto);
         item.setOwner(owner);
         Item savedItem = itemDAO.save(item);
+
         logger.info("Айтем успешно создан с ID: {}", savedItem.getItemId());
         return itemMapper.toItemCreateResponseDTO(savedItem);
     }
@@ -65,9 +67,8 @@ public class ItemService {
                     logger.error("ParsingTask с ID {} не найден", response.getTaskId());
                     return new EntityNotFoundException("ParsingTask не найден");
                 });
+
         User owner = task.getUser();
-
-
         Item item = new Item();
         item.setItemName(response.getItemName());
         item.setDescription(response.getDescription());

@@ -8,15 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
+//Class for quick test
 @RestController
 @RequestMapping("/api")
-public class ParserController {
-
+public class DirectParseController {
     private final OzonParserService ozonParserService;
     private final WildberriesParserService wbParserService;
 
-    public ParserController(OzonParserService ozonParserService,
-                            WildberriesParserService wbParserService) {
+    public DirectParseController(OzonParserService ozonParserService,
+                                 WildberriesParserService wbParserService) {
         this.ozonParserService = ozonParserService;
         this.wbParserService = wbParserService;
     }

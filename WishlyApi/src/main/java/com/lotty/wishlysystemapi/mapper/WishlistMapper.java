@@ -15,9 +15,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface WishlistMapper {
 
-    @Mapping(target = "wishlistId", ignore = true) // генерируется БД
-    @Mapping(target = "user", ignore = true)       // установим вручную
-    @Mapping(target = "wishlistItems", ignore = true)  // пустой при создании
+    @Mapping(target = "wishlistId", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "wishlistItems", ignore = true)
     @Mapping(target = "createDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "modifiedDate", expression = "java(java.time.LocalDateTime.now())")
     Wishlist toEntity(WishlistCreateDTO dto);

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class ParsingTask {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "task_id")  // Явное указание имени столбца
+    @Column(name = "task_id")
     private Integer taskId;
 
     @Column(name = "url")

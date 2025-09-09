@@ -14,6 +14,6 @@ public class TaskResponseDTO {
         this.taskId = taskId;
         this.message = message;
         this.createdAt = LocalDateTime.now();
-        this.statusUrl = "/api/tasks/" + taskId; // Для удобства клиента
+        this.statusUrl = "/api/tasks/" + taskId;
     }
 }

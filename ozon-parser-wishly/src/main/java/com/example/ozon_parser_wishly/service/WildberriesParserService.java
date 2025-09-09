@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,41 +30,45 @@ public class WildberriesParserService {
 
         WebDriver driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        ItemParseResponseDTO itemParseResponseDTO = new ItemParseResponseDTO();
+
+        ItemParseResponseDTO dto = new ItemParseResponseDTO();
 
         try {
+            logger.info("Начало парсинга товара по URL: {}", url);
             driver.get(url);
+
             makeBrowserLookHuman(driver);
             humanScroll(driver);
 
-            // Ждем появления заголовка
             wait.until((ExpectedCondition<Boolean>) d ->
                     ((JavascriptExecutor) d).executeScript("return document.querySelector('h1') !== null").equals(true)
             );
 
-            itemParseResponseDTO.setItemName(getItemName(driver));
-            itemParseResponseDTO.setImageURL(getMainImage(driver));
-            itemParseResponseDTO.setSourceURL(url);
-            itemParseResponseDTO.setDescription(getDescription(driver));
-            itemParseResponseDTO.setPrice(getPrice(driver));
+            dto.setItemName(getItemName(driver));
+            dto.setImageURL(getMainImage(driver));
+            dto.setSourceURL(url);
+            dto.setDescription(getDescription(driver));
+            dto.setPrice(getPrice(driver));
 
+            logger.info("Парсинг успешно завершен: {}", dto);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка при парсинге товара с URL {}", url, e);
         } finally {
             driver.quit();
+            logger.debug("ChromeDriver закрыт");
         }
 
-        return itemParseResponseDTO;
+        return dto;
     }
 
     private void makeBrowserLookHuman(WebDriver driver) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript(
+        ((JavascriptExecutor) driver).executeScript(
                 "Object.defineProperty(navigator, 'webdriver', {get: () => false});" +
                         "window.chrome = { runtime: {} };" +
                         "Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});" +
                         "Object.defineProperty(navigator, 'languages', {get: () => ['en-US','en']});"
         );
+        logger.debug("Anti-bot скрипты применены");
     }
 
     private void humanScroll(WebDriver driver) {
@@ -75,87 +78,73 @@ public class WildberriesParserService {
             js.executeScript("window.scrollBy(0, arguments[0]);", scrollAmount);
             try {
                 Thread.sleep(300 + (int) (Math.random() * 700));
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
         }
         js.executeScript("window.scrollTo(0, 0);");
-
+        logger.debug("Эмуляция скролла завершена");
     }
-
 
     private String getItemName(WebDriver driver) {
         try {
-            WebElement nameEl = driver.findElement(By.cssSelector("h1.productTitle--J2W7I"));
-            return nameEl.getText().trim();
+            WebElement el = driver.findElement(By.cssSelector("h1.productTitle--J2W7I"));
+            return el.getText().trim();
         } catch (NoSuchElementException e) {
+            logger.warn("Название не найдено");
             return "Название не найдено";
         }
     }
 
-    // --- описание ---
     private String getDescription(WebDriver driver) {
         try {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-
-            // жмём на кнопку "Характеристики и описание"
             WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(
                     By.cssSelector("button.btnDetail--im7UR")));
             btn.click();
-
-            // ждём появления блока с описанием
+            logger.debug("Клик по кнопке 'Показать полностью' выполнен");
             WebElement desc = wait.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("p.descriptionText--Jq9n2")));
-
             return desc.getText().trim();
         } catch (TimeoutException | NoSuchElementException e) {
+            logger.warn("Описание не найдено");
             return "Описание не найдено";
         }
     }
 
-    // --- цена ---
     private Double getPrice(WebDriver driver) {
         try {
-            // Сначала ищем "кошелек" — акционная цена
-            List<WebElement> walletPriceElems = driver.findElements(By.cssSelector("span.priceBlockWalletPrice--RJGuT"));
-            for (WebElement el : walletPriceElems) {
-                String priceText = el.getText().replaceAll("[^0-9]", "");
-                if (!priceText.isEmpty()) {
-                    logger.info("Wallet price digits only: '{}'", priceText);
-                    return Double.valueOf(priceText);
+            List<WebElement> walletPrices = driver.findElements(By.cssSelector("span.priceBlockWalletPrice--RJGuT"));
+            for (WebElement el : walletPrices) {
+                String text = el.getText().replaceAll("[^0-9]", "");
+                if (!text.isEmpty()) {
+                    logger.info("Цена (wallet): {}", text);
+                    return Double.valueOf(text);
                 }
             }
 
-            // Если цены кошелька нет, берём финальную цену
-            List<WebElement> finalPriceElems = driver.findElements(By.cssSelector("ins.priceBlockFinalPrice--iToZR"));
-            for (WebElement el : finalPriceElems) {
-                String priceText = el.getText().replaceAll("[^0-9]", "");
-                if (!priceText.isEmpty()) {
-                    logger.info("Final price digits only: '{}'", priceText);
-                    return Double.valueOf(priceText);
+            List<WebElement> finalPrices = driver.findElements(By.cssSelector("ins.priceBlockFinalPrice--iToZR"));
+            for (WebElement el : finalPrices) {
+                String text = el.getText().replaceAll("[^0-9]", "");
+                if (!text.isEmpty()) {
+                    logger.info("Цена (final): {}", text);
+                    return Double.valueOf(text);
                 }
             }
         } catch (Exception e) {
-            logger.error("Error while parsing price", e);
+            logger.error("Ошибка при парсинге цены", e);
         }
         return null;
     }
 
-
-
-
-
-
-
-
-    // --- картинка ---
     private String getMainImage(WebDriver driver) {
         try {
             WebElement img = driver.findElement(By.cssSelector("div.imageContainer--TnaxW img"));
             String src = img.getAttribute("src");
-            return (src != null && !src.isEmpty()) ? src : null;
+            if (src != null && !src.isEmpty()) {
+                return src;
+            }
         } catch (NoSuchElementException e) {
-            return null;
+            logger.warn("Главное изображение не найдено");
         }
-
+        return null;
     }
 }

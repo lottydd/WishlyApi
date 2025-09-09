@@ -23,15 +23,12 @@ public class KafkaConsumerService {
     @KafkaListener(topics = "parse-requests", groupId = "parser-group")
     public void consume(ParseRequestDTO request) {
         try {
-            // Парсим как обычно
+
             ItemParseResponseDTO response = parseProduct(request.getUrl());
-
-            // Добавляем taskId в ответ
             response.setTaskId(request.getTaskId());
-
             kafkaTemplate.send("parse-results", response);
+
         } catch (Exception e) {
-            // Отправляем ответ с ошибкой
             ItemParseResponseDTO errorResponse = new ItemParseResponseDTO();
             errorResponse.setTaskId(request.getTaskId());
             errorResponse.setErrorMessage("Ошибка парсинга: " + e.getMessage());
@@ -44,11 +41,9 @@ public class KafkaConsumerService {
         if (url.contains("ozon.ru") || url.contains("ozon.")) {
             return ozonParserService.parseProduct(url);
 
-        } else if (url.contains("wildberries.ru") || url.contains("wb.ru")) {
-            return wbParserService.parseProduct(url);
+        } else if (url.contains("wildberries.ru") || url.contains("wb.ru"))
+           {return wbParserService.parseProduct(url);}
 
-        } else {
-            throw new UnsupportedOperationException("Сайт не поддерживается: " + url);
-        }
+        else {throw new UnsupportedOperationException("Сайт не поддерживается: " + url);}
     }
 }

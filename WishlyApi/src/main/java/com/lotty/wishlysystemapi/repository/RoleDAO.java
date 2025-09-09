@@ -27,7 +27,6 @@ public class RoleDAO extends BaseDAO<Role, Integer>{
                     )
                     .setParameter("roleName", roleName)
                     .getSingleResult();
-
             return Optional.of(role);
 
         } catch (NoResultException e) {

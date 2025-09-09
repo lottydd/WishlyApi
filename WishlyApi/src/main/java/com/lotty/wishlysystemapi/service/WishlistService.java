@@ -49,12 +49,10 @@ public class WishlistService {
     @Transactional
     public WishlistCreateResponseDTO createWishlist(WishlistCreateDTO dto) {
 
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         logger.info("Authorities: {}", auth.getAuthorities());
 
         String username = auth.getName();
-
         logger.info("Создание вишлиста для пользователя {}", username);
 
         User user = userDAO.findByUsername(username)
@@ -67,11 +65,9 @@ public class WishlistService {
         wishlist.setUser(user);
         wishlist.setCreateDate(LocalDateTime.now());
         wishlist.setModifiedDate(LocalDateTime.now());
-
         Wishlist savedWishlist = wishlistDAO.save(wishlist);
 
         logger.info("Вишлист успешно создан с ID: {} для пользователя {}", savedWishlist.getWishlistId(), username);
-
         return wishlistMapper.toWishlistCreateDTO(savedWishlist);
     }
 
@@ -183,7 +179,6 @@ public class WishlistService {
                     logger.error("Вишлист с ID {} не найден", wishlistId);
                     return new EntityNotFoundException("Вишлист не найден");
                 });
-
         return wishlistMapper.toWishlistDTO(wishlist);
     }
 }

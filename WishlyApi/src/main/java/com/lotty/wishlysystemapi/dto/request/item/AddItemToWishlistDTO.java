@@ -19,18 +19,18 @@ public class AddItemToWishlistDTO {
     @Schema(description = "ID вишлиста", example = "101", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer wishlistId;
 
-    @Schema(description = "Описание вещи", example = "Наушники с шумоподавлением")
+    @Schema(description = "Описание айтем", example = "Наушники с шумоподавлением")
     private String description;
 
-    @Schema(description = "Ссылка на источник вещи", example = "http://store.com/item/321")
+    @Schema(description = "Ссылка на айтем", example = "http://store.com/item/321")
     private String sourceURL;
 
-    @Schema(description = "Цена вещи", example = "199.99")
+    @Schema(description = "Цена айтем", example = "199.99")
     private Double price;
 
-    @Schema(description = "Название вещи", example = "Sony WH-1000XM5")
+    @Schema(description = "Название айтем", example = "Sony WH-1000XM5")
     private String itemName;
 
-    @Schema(description = "URL изображения вещи", example = "http://example.com/sony.jpg")
+    @Schema(description = "URL изображения айтем", example = "http://example.com/sony.jpg")
     private String imageURL;
 }
