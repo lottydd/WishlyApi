@@ -3,6 +3,7 @@ package com.lotty.wishlysystemapi.mapper;
 import com.lotty.wishlysystemapi.dto.request.user.UserCreateDTO;
 import com.lotty.wishlysystemapi.dto.request.user.UserUpdateDTO;
 import com.lotty.wishlysystemapi.dto.response.user.UserCreateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.user.UserPrivateInfoResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.user.UserResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.user.UserUpdateResponseDTO;
 import com.lotty.wishlysystemapi.model.Role;
@@ -32,7 +33,10 @@ public interface UserMapper {
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
     UserResponseDTO toUserResponseDTO(User user);
 
+    @Mapping(target = "id", source = "userId")
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
+    UserPrivateInfoResponseDTO toUserPrivateInfoResponseDTO(User user);
+
     UserUpdateResponseDTO toUserUpdateResponseDTO(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

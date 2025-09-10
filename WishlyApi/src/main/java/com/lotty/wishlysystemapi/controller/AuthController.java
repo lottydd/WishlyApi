@@ -1,6 +1,6 @@
 package com.lotty.wishlysystemapi.controller;
 
-import com.lotty.wishlysystemapi.dto.request.security.AuthRequestDTO;
+import com.lotty.wishlysystemapi.dto.request.user.AuthRequestDTO;
 import com.lotty.wishlysystemapi.dto.response.security.AuthResponseDTO;
 import com.lotty.wishlysystemapi.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;

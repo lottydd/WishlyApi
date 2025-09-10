@@ -5,14 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.List;
 
+import java.util.List;
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "DTO с информацией о пользователе")
-public class UserResponseDTO {
+@Schema(description = "DTO с приватной информацией о пользователе")
+public class UserPrivateInfoResponseDTO {
+    @Schema(description = "ID пользователя", example = "1")
+    private Integer id;
 
     @Schema(description = "Имя пользователя", example = "john")
     private String username;
@@ -23,4 +25,6 @@ public class UserResponseDTO {
     @Schema(description = "Описание пользователя", example = "Бедный программист")
     private String description;
 
+    @Schema(description = "Список ролей пользователя", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
+    private List<String> roles;
 }
