@@ -30,7 +30,6 @@ public interface UserMapper {
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
     UserCreateResponseDTO toUserCreateResponseDTO(User user);
 
-    @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
     UserResponseDTO toUserResponseDTO(User user);
 
     @Mapping(target = "id", source = "userId")

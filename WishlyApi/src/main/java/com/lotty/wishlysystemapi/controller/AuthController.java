@@ -18,18 +18,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Auth", description = "Авторизация пользователей")
 public class AuthController {
 
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
 
     public AuthController(AuthenticationManager authManager, JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.authManager = authManager;
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
     }
 
     @Operation(summary = "Вход в систему", description = "Авторизация пользователя и выдача JWT токена")

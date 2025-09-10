@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/wishlists")
+@RequestMapping("/api/v1/wishlists")
 @Tag(name = "Wishlists", description = "Управление вишлистами")
 public class WishlistController {
 
@@ -27,44 +27,38 @@ public class WishlistController {
         this.wishlistService = wishlistService;
     }
 
-    @Operation(summary = "Создать новый вишлист")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Создать новый вишлист")
     @PostMapping
     public ResponseEntity<WishlistCreateResponseDTO> createWishlist(@RequestBody WishlistCreateDTO dto) {
-        WishlistCreateResponseDTO response = wishlistService.createWishlist(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(wishlistService.createWishlist(dto));
     }
 
-    @Operation(summary = "Получить все вишлисты пользователя")
-    @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<List<WishlistResponseDTO>> getUserWishlists(
-            @Parameter(description = "ID пользователя") @PathVariable Integer userId) {
-        List<WishlistResponseDTO> response = wishlistService.getUserWishlists(userId);
-        return ResponseEntity.ok(response);
+    @Operation(summary = "Получить все вишлисты пользователя")
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<WishlistResponseDTO>> getUserWishlists(@PathVariable String username) {
+        return ResponseEntity.ok(wishlistService.getUserWishlists(username));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Получить вишлист по ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<WishlistResponseDTO> getWishlistById(
-            @Parameter(description = "ID вишлиста") @PathVariable Integer id) {
-        WishlistResponseDTO response = wishlistService.getWishlistById(id);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<WishlistResponseDTO> getWishlistById(@PathVariable Integer id) {
+        return ResponseEntity.ok(wishlistService.getWishlistInfo(id));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Обновить вишлист")
     @PutMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<WishlistUpdateResponseDTO> updateWishlist(@RequestBody WishlistUpdateDTO dto) {
-        WishlistUpdateResponseDTO response = wishlistService.updateWishlist(dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(wishlistService.updateWishlist(dto));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Удалить вишлист")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Void> deleteWishlist(@Parameter(description = "ID вишлиста") @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteWishlist(@PathVariable Integer id) {
         wishlistService.deleteWishlist(id);
         return ResponseEntity.noContent().build();
     }
