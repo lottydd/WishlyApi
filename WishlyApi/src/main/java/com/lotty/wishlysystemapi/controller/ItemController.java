@@ -2,7 +2,7 @@ package com.lotty.wishlysystemapi.controller;
 
 import com.example.common.dto.ParseRequestDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
-import com.lotty.wishlysystemapi.dto.request.wishlist.UpdateItemDTO;
+import com.lotty.wishlysystemapi.dto.request.item.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.task.TaskResponseDTO;
@@ -10,7 +10,6 @@ import com.lotty.wishlysystemapi.dto.response.task.TaskStatusResponseDTO;
 import com.lotty.wishlysystemapi.service.ItemService;
 import com.lotty.wishlysystemapi.service.ParsingTaskService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,7 @@ public class ItemController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Создать новый айтем")
+    @Operation(summary = "Добавить новый айтем")
     @PostMapping("/create/{username}")
     public ResponseEntity<ItemCreateResponseDTO> createItem(
             @RequestBody AddItemToWishlistDTO dto,
@@ -50,17 +49,17 @@ public class ItemController {
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Удалить айтем")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Integer id) {
-        itemService.deleteItem(id);
+    @DeleteMapping("/{itemid}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Integer itemid) {
+        itemService.deleteItem(itemid);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Получить айтем по ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<ItemResponseDTO> getItemById(@PathVariable Integer id) {
-        return ResponseEntity.ok(itemService.getItemById(id));
+    @GetMapping("/{itemid}")
+    public ResponseEntity<ItemResponseDTO> getItemById(@PathVariable Integer itemid) {
+        return ResponseEntity.ok(itemService.getItemById(itemid));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

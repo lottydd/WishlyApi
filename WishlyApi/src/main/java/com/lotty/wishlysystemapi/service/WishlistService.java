@@ -109,6 +109,7 @@ public class WishlistService {
         return wishlistMapper.toWishlistUpdateDTO(updatedWishlist);
     }
 
+    //controller
     @Transactional
     public WishlistUpdateResponseDTO createAndAddItemToWishlist(Integer wishlistId, AddItemToWishlistDTO dto) {
         logger.info("Создание и добавление айтема в вишлист {}", wishlistId);
@@ -166,7 +167,6 @@ public class WishlistService {
         logger.info("Вишлист ID {} успешно удален", wishlistId);
     }
 
-
     @Transactional
     public WishlistUpdateResponseDTO removeItemFromWishlist(Integer wishlistId, Integer itemId) {
         logger.info("Удаление айтема {} из вишлиста {}", itemId, wishlistId);
@@ -176,16 +176,13 @@ public class WishlistService {
 
         Item item = itemService.findItemByIdOrThrow(itemId);
         validateItemInWishlist(wishlist, item);
-
         wishlist.getWishlistItems().remove(item);
         wishlist.setModifiedDate(LocalDateTime.now());
-
         Wishlist updatedWishlist = wishlistDAO.save(wishlist);
-        logger.info("Айтем {} удален из вишлиста {}", itemId, wishlistId);
 
+        logger.info("Айтем {} удален из вишлиста {}", itemId, wishlistId);
         return wishlistMapper.toWishlistUpdateDTO(updatedWishlist);
     }
-
 
     @Transactional(readOnly = true)
     public List<ItemResponseDTO> getWishlistItems(Integer wishlistId) {
@@ -204,7 +201,6 @@ public class WishlistService {
         return items;
     }
 
-
     @Transactional(readOnly = true)
     public WishlistResponseDTO getWishlistPrivateInfoById(Integer wishlistId) {
         logger.info("Получение вишлиста ID: {}", wishlistId);
@@ -212,7 +208,6 @@ public class WishlistService {
         checkWishlistAccess(wishlist);
         return wishlistMapper.toWishlistDTO(wishlist);
     }
-
 
     @Transactional(readOnly = true)
     public WishlistResponseDTO getWishlistInfo(Integer wishlistId) {
@@ -222,27 +217,11 @@ public class WishlistService {
     }
 
 
-    @Transactional(readOnly = true)
-    public WishlistResponseDTO getWishlistPrivateInfo(Integer wishlistId) {
-
-        logger.info("Получение вишлиста ID: {}", wishlistId);
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
-        return wishlistMapper.toWishlistDTO(wishlist);
-    }
-
     private Wishlist findWishlistByIdOrThrow(Integer wishlistId) {
         return wishlistDAO.findById(wishlistId)
                 .orElseThrow(() -> {
                     logger.error("Вишлист с ID {} не найден", wishlistId);
                     return new EntityNotFoundException("Вишлист не найден");
-                });
-    }
-
-    private User findUserByIdOrThrow(Integer userId) {
-        return userDAO.findById(userId)
-                .orElseThrow(() -> {
-                    logger.error("Пользователь с ID {} не найден", userId);
-                    return new EntityNotFoundException("Пользователь не найден");
                 });
     }
 

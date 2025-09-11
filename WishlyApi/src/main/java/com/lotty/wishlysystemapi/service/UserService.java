@@ -60,8 +60,26 @@ public class UserService {
         return userMapper.toUserCreateResponseDTO(savedUser);
     }
 
+
     @Transactional
-    public UserUpdateResponseDTO assignRoleToUser(int userId, String roleName) {
+    public void assignRoleToUser(int userId, String roleName) {
+        logger.info("Попытка назначения роли пользователю. UserID: {}, Role: {}", userId, roleName);
+
+        User user = findUserByIdOrThrow(userId);
+        Role role = findRoleByNameOrThrow(roleName);
+
+        validateRoleNotAssigned(user, roleName);
+        user.getRoles().add(role);
+        userDAO.save(user);
+
+        logger.info("Роль успешно назначена. UserID: {}, Role: {}", userId, roleName);
+        userMapper.toUserUpdateResponseDTO(user);
+    }
+
+
+
+    @Transactional
+    public UserUpdateResponseDTO assignRoleToUserByAdmin(int userId, String roleName) {
         logger.info("Попытка назначения роли пользователю. UserID: {}, Role: {}", userId, roleName);
 
         checkAdminAccess();
@@ -167,11 +185,6 @@ public class UserService {
         return items;
     }
 
-    @Transactional(readOnly = true)
-    public User findUserByIdForTask(Integer userId) {
-        logger.info("Поиск пользователя по ID: {}", userId);
-        return findUserByIdOrThrow(userId);
-    }
 
     @Transactional(readOnly = true)
     public User findUserByNameOrThrow(String username) {

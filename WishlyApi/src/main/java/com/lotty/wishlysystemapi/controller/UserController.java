@@ -30,6 +30,17 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Изменить пароль пользователя")
+    @PutMapping("/{username}/password")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable String username,
+            @RequestBody ChangePasswordRequestDTO dto) {
+        userService.changePassword(username, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @Operation(summary = "Регистрация нового пользователя")
     @PostMapping("/signup")
     public ResponseEntity<UserCreateResponseDTO> createUser(@RequestBody UserCreateDTO dto) {
@@ -39,10 +50,10 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Получить приватную информацию о пользователе по ID")
-    @GetMapping("/{id}/private-info")
+    @GetMapping("/{userid}/private-info")
     public ResponseEntity<UserPrivateInfoResponseDTO> getUserFullInfo(
-            @Parameter(description = "ID пользователя") @PathVariable Integer id) {
-        return ResponseEntity.ok(userService.getUserByIdForAdmin(id));
+            @Parameter(description = "ID пользователя") @PathVariable Integer userid) {
+        return ResponseEntity.ok(userService.getUserByIdForAdmin(userid));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -61,15 +72,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(username, dto));
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Изменить пароль пользователя")
-    @PutMapping("/{username}/password")
-    public ResponseEntity<Void> changePassword(
-            @PathVariable String username,
-            @RequestBody ChangePasswordRequestDTO dto) {
-        userService.changePassword(username, dto);
-        return ResponseEntity.noContent().build();
-    }
+
 
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @Operation(summary = "Получить все айтемы пользователя")
@@ -80,10 +83,10 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Удалить роль у пользователя")
-    @DeleteMapping("/{id}/roles/{role}")
+    @DeleteMapping("/{userid}/roles/{role}")
     public ResponseEntity<UserUpdateResponseDTO> deleteRoleFromUser(
-            @PathVariable Integer id,
+            @PathVariable Integer userid,
             @PathVariable String role) {
-        return ResponseEntity.ok(userService.deleteRoleFromUser(id, role));
+        return ResponseEntity.ok(userService.deleteRoleFromUser(userid, role));
     }
 }

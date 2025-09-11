@@ -33,22 +33,46 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+                        // Публичные эндпоинты
                         .requestMatchers("/", "/public/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/signup").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll() // логин
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/signup").permitAll() // регистрация
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**"
+                        ).permitAll()
 
                         // Users
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{userid}/private-info").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}/info").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{username}/update-data").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{username}/password").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}/items").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userid}/roles/{role}").hasRole("ADMIN")
 
                         // Wishlists
-                        .requestMatchers("/api/v1/wishlists/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/wishlists").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/user/{username}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/items").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/private-info/{wishlistid}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/{itemid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
 
                         // Items
-                        .requestMatchers("/api/v1/items/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/items/create/{username}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/items").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/items/{itemid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/items/{itemid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/items/user/{username}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/items/parse").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/items/tasks/{taskId}").hasAnyRole("USER", "ADMIN")
 
+                        // Всё остальное
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,11 +82,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setUserDetailsService(userDetailsService); // кастомный UserDetailsService
+        provider.setPasswordEncoder(passwordEncoder()); // BCrypt для хранения пароля
         return provider;
     }
 

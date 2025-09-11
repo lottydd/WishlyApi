@@ -2,6 +2,7 @@ package com.lotty.wishlysystemapi.controller;
 
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistCreateDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistUpdateDTO;
+import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistUpdateResponseDTO;
@@ -43,23 +44,48 @@ public class WishlistController {
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Получить вишлист по ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<WishlistResponseDTO> getWishlistById(@PathVariable Integer id) {
-        return ResponseEntity.ok(wishlistService.getWishlistInfo(id));
+    @GetMapping("/{wishlistid}")
+    public ResponseEntity<WishlistResponseDTO> getWishlistById(@PathVariable Integer wishlistid) {
+        return ResponseEntity.ok(wishlistService.getWishlistInfo(wishlistid));
     }
+
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Operation(summary = "Получить полную информацию о вишлисте по ID")
+    @GetMapping("private-info/{wishlistid}")
+    public ResponseEntity<WishlistResponseDTO> getWishlistInfoById(@PathVariable Integer wishlistid) {
+        return ResponseEntity.ok(wishlistService.getWishlistPrivateInfoById(wishlistid));
+    }
+
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Получить айтемы из вишлиста по ID")
+    @GetMapping("/{wishlistid}/items")
+    public ResponseEntity<List<ItemResponseDTO>> getWishlistItemsById(@PathVariable Integer wishlistid) {
+        return ResponseEntity.ok(wishlistService.getWishlistItems(wishlistid));
+    }
+
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Удалить айтем из вишлиста по ID")
+    @DeleteMapping("/{wishlistid}/{itemid}")
+    public ResponseEntity<WishlistUpdateResponseDTO> removeItemFromWishlistById(@PathVariable Integer wishlistid, @PathVariable Integer itemid) {
+        return ResponseEntity.ok(wishlistService.removeItemFromWishlist(wishlistid, itemid));
+    }
+
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Обновить вишлист")
-    @PutMapping
-    public ResponseEntity<WishlistUpdateResponseDTO> updateWishlist(@RequestBody WishlistUpdateDTO dto) {
+    @PutMapping("/{wishlistid}")
+    public ResponseEntity<WishlistUpdateResponseDTO> updateWishlistData(@RequestBody WishlistUpdateDTO dto) {
         return ResponseEntity.ok(wishlistService.updateWishlist(dto));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Удалить вишлист")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWishlist(@PathVariable Integer id) {
-        wishlistService.deleteWishlist(id);
+    @DeleteMapping("/{wishlistid}")
+    public ResponseEntity<Void> deleteWishlist(@PathVariable Integer wishlistid) {
+        wishlistService.deleteWishlist(wishlistid);
         return ResponseEntity.noContent().build();
     }
 }
