@@ -13,9 +13,6 @@ import lombok.Setter;
 @Schema(description = "Запрос для добавления вещи в вишлист")
 public class AddItemToWishlistDTO {
 
-    @Schema(description = "ID пользователя", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Integer userId;
-
     @Schema(description = "ID вишлиста", example = "101", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer wishlistId;
 

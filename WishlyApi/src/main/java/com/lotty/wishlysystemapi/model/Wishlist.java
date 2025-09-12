@@ -28,7 +28,7 @@ public class Wishlist {
 
     private String wishlistDescription;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(
             name = "WishlistItems",
             joinColumns = @JoinColumn(name = "wishlistId"),

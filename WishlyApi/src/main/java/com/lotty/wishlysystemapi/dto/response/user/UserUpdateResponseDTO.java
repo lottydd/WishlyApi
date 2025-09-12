@@ -24,9 +24,4 @@ public class UserUpdateResponseDTO {
     @Schema(description = "Описание пользователя", example = "Бедный программист")
     private String description;
 
-
-    @Schema(description = "Роли пользователя", example = "User, Admin")
-    private List<String> roles;
-
-
 }

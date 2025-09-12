@@ -1,5 +1,7 @@
 package com.lotty.wishlysystemapi.security;
 
+import com.lotty.wishlysystemapi.model.User;
+import com.lotty.wishlysystemapi.repository.UserDAO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,10 +20,12 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final UserDAO userDAO;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(UserDAO userDAO, JwtUtil jwtService, UserDetailsService userDetailsService) {
+        this.userDAO = userDAO;
         this.jwtUtil = jwtService;
         this.userDetailsService = userDetailsService;
     }
@@ -42,7 +46,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
+            User user = userDAO.findByUsername(username).orElseThrow();
+            if (jwtUtil.isTokenValid(jwt, userDetails, user.getLastPasswordChange())) {
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );

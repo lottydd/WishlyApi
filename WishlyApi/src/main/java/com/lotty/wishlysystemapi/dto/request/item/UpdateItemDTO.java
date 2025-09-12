@@ -1,4 +1,4 @@
-package com.lotty.wishlysystemapi.dto.request.wishlist;
+package com.lotty.wishlysystemapi.dto.request.item;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

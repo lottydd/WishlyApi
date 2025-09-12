@@ -1,4 +1,4 @@
-package com.lotty.wishlysystemapi.dto.request.security;
+package com.lotty.wishlysystemapi.dto.request.user;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

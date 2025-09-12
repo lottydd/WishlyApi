@@ -26,6 +26,7 @@ public class KafkaConsumerService {
 
             ItemParseResponseDTO response = parseProduct(request.getUrl());
             response.setTaskId(request.getTaskId());
+            response.setWishlistId(request.getWishlistId());
             kafkaTemplate.send("parse-results", response);
 
         } catch (Exception e) {

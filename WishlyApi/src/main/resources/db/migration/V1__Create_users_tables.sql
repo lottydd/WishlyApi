@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS Users(
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(255),
-    password VARCHAR(255) NOT NULL
-           );
-
+    password VARCHAR(255) NOT NULL,
+    last_password_change TIMESTAMP DEFAULT NOW() NOT NULL
+);
 -- UserRoles
 CREATE TABLE IF NOT EXISTS UserRoles(
     user_id INT REFERENCES Users(userId) ON DELETE CASCADE,

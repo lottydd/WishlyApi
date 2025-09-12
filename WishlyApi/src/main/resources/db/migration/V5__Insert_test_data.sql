@@ -3,12 +3,12 @@ INSERT INTO Roles (roleName) VALUES
 ('ROLE_ADMIN');
 
 -- Fill Users table
-INSERT INTO Users (username, email, description, password) VALUES
-('ivan_petrov', 'ivan.petrov@mail.com', 'Regular user interested in technology', 'hashed_password_1'),
-('anna_sidorova', 'anna.sidorova@mail.com', 'Book lover and collector', 'hashed_password_2'),
-('sergey_kozlov', 'sergey.kozlov@mail.com', 'Sports enthusiast and traveler', 'hashed_password_3'),
-('maria_ivanova', 'maria.ivanova@mail.com', 'Professional photographer', 'hashed_password_4'),
-('alexey_fedorov', 'alexey.fedorov@mail.com', 'Software developer and gamer', 'hashed_password_5');
+INSERT INTO Users (username, email, description, password, last_password_change) VALUES
+('ivan_petrov', 'ivan.petrov@mail.com', 'Regular user interested in technology', 'hashed_password_1', NOW()),
+('anna_sidorova', 'anna.sidorova@mail.com', 'Book lover and collector', 'hashed_password_2', NOW()),
+('sergey_kozlov', 'sergey.kozlov@mail.com', 'Sports enthusiast and traveler', 'hashed_password_3', NOW()),
+('maria_ivanova', 'maria.ivanova@mail.com', 'Professional photographer', 'hashed_password_4', NOW()),
+('alexey_fedorov', 'alexey.fedorov@mail.com', 'Software developer and gamer', 'hashed_password_5', NOW());
 
 -- Assign roles to users
 INSERT INTO UserRoles (user_id, role_id) VALUES

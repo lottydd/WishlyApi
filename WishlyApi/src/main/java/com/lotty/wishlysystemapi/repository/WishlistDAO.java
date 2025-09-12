@@ -1,11 +1,13 @@
 package com.lotty.wishlysystemapi.repository;
 
 import com.lotty.wishlysystemapi.model.Wishlist;
+import jakarta.persistence.NoResultException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class WishlistDAO extends BaseDAO<Wishlist, Integer> {
@@ -22,6 +24,33 @@ public class WishlistDAO extends BaseDAO<Wishlist, Integer> {
                 .setParameter("userId", userId)
                 .getResultList();
     }
+
+    public List<Wishlist> findAllByUserIdWithItems(Integer userId) {
+        logger.info("Поиск всех вишлистов пользователя с ID {} с загрузкой items", userId);
+        return entityManager.createQuery(
+                        "SELECT DISTINCT w FROM Wishlist w " +
+                                "LEFT JOIN FETCH w.wishlistItems " +
+                                "WHERE w.user.userId = :userId", Wishlist.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
+    public Optional<Wishlist> findByIdWithItems(Integer wishlistId) {
+        logger.info("Поиск вишлиста с ID {} с загрузкой items", wishlistId);
+        try {
+            Wishlist wishlist = entityManager.createQuery(
+                            "SELECT DISTINCT w FROM Wishlist w " +
+                                    "LEFT JOIN FETCH w.wishlistItems " +
+                                    "WHERE w.wishlistId = :wishlistId", Wishlist.class)
+                    .setParameter("wishlistId", wishlistId)
+                    .getSingleResult();
+            return Optional.of(wishlist);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+
 
     public boolean existsById(Integer wishlistId) {
         logger.info("Проверка существования вишлиста с ID {}", wishlistId);
