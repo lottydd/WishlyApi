@@ -97,6 +97,30 @@ public class WishlistService {
         return wishlistMapper.toWishlistUpdateDTO(updatedWishlist);
     }
 
+    @Transactional
+    public WishlistUpdateResponseDTO addItemToWishlistWithoutAuthCheck(Integer wishlistId, Integer itemId) {
+        logger.info("Добавление айтема {} в вишлист {}", itemId, wishlistId);
+
+        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
+        Item item = itemService.findItemByIdOrThrow(itemId);
+
+        if (wishlist.getWishlistItems().contains(item)) {
+            logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", item.getItemId(), wishlistId);
+            throw new IllegalArgumentException(
+                    String.format("Айтем с ID %d уже содержится в вишлисте %d", item.getItemId(), wishlistId)
+            );
+        }
+        wishlist.getWishlistItems().add(item);
+        item.getInWishlists().add(wishlist);
+        wishlist.setModifiedDate(LocalDateTime.now());
+        Wishlist updatedWishlist = wishlistDAO.save(wishlist);
+        logger.info("Айтем {} добавлен в вишлист {}", itemId, wishlistId);
+
+        return wishlistMapper.toWishlistUpdateDTO(updatedWishlist);
+    }
+
+
+
     //controller
     @Transactional
     public WishlistUpdateResponseDTO createAndAddItemToWishlist(Integer wishlistId, AddItemToWishlistDTO dto) {

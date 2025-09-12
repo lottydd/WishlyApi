@@ -3,7 +3,10 @@ package com.lotty.wishlysystemapi.service;
 
 import com.example.common.dto.ItemParseResponseDTO;
 import com.lotty.wishlysystemapi.model.Item;
+import com.lotty.wishlysystemapi.model.ParsingTask;
+import com.lotty.wishlysystemapi.repository.ParsingTaskDAO;
 import com.lotty.wishlysystemapi.status.TaskStatus;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -30,7 +33,7 @@ public class KafkaConsumerService {
             logger.info("Попытка создания айтема из распаршенных данных. taskId={}", response.getTaskId());
             Item item = itemService.createItemFromParsedData(response);
             logger.info("Айтем создан id={} — добавляем в вишлист {}", item.getItemId(), response.getWishlistId());
-            wishlistService.addItemToWishlist(response.getWishlistId(), item.getItemId());
+            wishlistService.addItemToWishlistWithoutAuthCheck(response.getWishlistId(), item.getItemId());
             parsingTaskService.markAsCompleted(response.getTaskId(), item.getItemId());
         } catch (Exception e) {
             logger.error("Ошибка в KafkaConsumerService.consume для taskId={}: {}", response.getTaskId(), e.getMessage(), e);
