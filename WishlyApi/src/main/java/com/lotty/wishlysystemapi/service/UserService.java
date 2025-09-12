@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -54,7 +55,7 @@ public class UserService {
 
         validateRegistrationData(userCreateDTO);
         User user = userMapper.toEntity(userCreateDTO, passwordEncoder);
-
+        user.setLastPasswordChange(LocalDateTime.now());
         User savedUser = userDAO.save(user);
         assignRoleToUser(savedUser.getUserId(), "ROLE_USER");
         return userMapper.toUserCreateResponseDTO(savedUser);
@@ -136,6 +137,7 @@ public class UserService {
         validatePasswordChangeAccess(user, dto, currentUsername);
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        user.setLastPasswordChange(LocalDateTime.now());
         userDAO.save(user);
 
         logger.info("Пароль успешно изменен: инициатор={}, пользователь={}",

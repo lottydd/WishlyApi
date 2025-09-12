@@ -1,6 +1,7 @@
 package com.lotty.wishlysystemapi.controller;
 
 import com.example.common.dto.ParseRequestDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.item.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
@@ -35,9 +36,9 @@ public class ItemController {
     @Operation(summary = "Добавить новый айтем")
     @PostMapping("/create/{username}")
     public ResponseEntity<ItemCreateResponseDTO> createItem(
-            @RequestBody AddItemToWishlistDTO dto,
+            @RequestBody AddItemDTO dto,
             @PathVariable String username) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.createItem(dto, username));
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.createItemWithoutWishlist(dto, username));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -54,7 +55,7 @@ public class ItemController {
         itemService.deleteItem(itemid);
         return ResponseEntity.noContent().build();
     }
-
+    //должно ли тут так быть вопрос
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Получить айтем по ID")
     @GetMapping("/{itemid}")

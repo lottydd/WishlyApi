@@ -36,8 +36,8 @@ public class SecurityConfig {
 
                         // Публичные эндпоинты
                         .requestMatchers("/", "/public/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll() // логин
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/signup").permitAll() // регистрация
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/signup").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
@@ -57,11 +57,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/wishlists").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/user/{username}").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/items").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/private-info/{wishlistid}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/{itemid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/item-data").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/{wishlistid}/items").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/wishlists/private-info/{wishlistid}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/wishlists/existed-item/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/wishlists/new-item/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/wishlists/{wishlistid}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/wishlists/{wishlistid}/{itemid}").hasAnyRole("USER", "ADMIN")
 
                         // Items
                         .requestMatchers(HttpMethod.POST, "/api/v1/items/create/{username}").hasAnyRole("USER", "ADMIN")

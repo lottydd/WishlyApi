@@ -1,6 +1,7 @@
 package com.lotty.wishlysystemapi.mapper;
 
 
+import com.lotty.wishlysystemapi.dto.request.item.AddItemDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.item.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
@@ -21,6 +22,15 @@ public interface ItemMapper {
     @Mapping(target = "inWishlists", ignore = true)
     @Mapping(target = "owner", ignore = true)
     Item toEntity(AddItemToWishlistDTO dto);
+
+
+
+    @Mapping(target = "itemId", ignore = true)
+    @Mapping(target = "inWishlists", ignore = true)
+    @Mapping(target = "owner", ignore = true)
+    Item toEntity(AddItemDTO dto);
+
+
 
 
     @Mapping(target = "itemId", ignore = true)

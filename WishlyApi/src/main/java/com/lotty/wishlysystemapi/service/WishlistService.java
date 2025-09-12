@@ -69,6 +69,7 @@ public class WishlistService {
         return wishlistMapper.toWishlistCreateDTO(savedWishlist);
     }
 
+
     @Transactional
     public WishlistUpdateResponseDTO addItemToWishlist(Integer wishlistId, Integer itemId) {
         logger.info("Добавление айтема {} в вишлист {}", itemId, wishlistId);
@@ -87,6 +88,7 @@ public class WishlistService {
 
         validateItemOwnership(item, wishlist.getUser());
         wishlist.getWishlistItems().add(item);
+        item.getInWishlists().add(wishlist);
         wishlist.setModifiedDate(LocalDateTime.now());
 
         Wishlist updatedWishlist = wishlistDAO.save(wishlist);

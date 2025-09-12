@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -41,8 +42,20 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, UserDetails userDetails, LocalDateTime lastPasswordChange) {
+        String username = extractUsername(token);
+
+        Date issuedAt = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getIssuedAt();
+
+        boolean notExpired = !isTokenExpired(token);
+        boolean notBeforePasswordChange = issuedAt.toInstant().isAfter(lastPasswordChange.atZone(java.time.ZoneId.systemDefault()).toInstant());
+
+        return username.equals(userDetails.getUsername()) && notExpired && notBeforePasswordChange;
     }
 
     private boolean isTokenExpired(String token) {

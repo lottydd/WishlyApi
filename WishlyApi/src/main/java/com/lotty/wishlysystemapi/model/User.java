@@ -43,4 +43,8 @@ public class User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<Item> ownedItems = new ArrayList<>();
+
+    @Column(name = "last_password_change", nullable = false)
+    private java.time.LocalDateTime lastPasswordChange = java.time.LocalDateTime.now();
+
 }

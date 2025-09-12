@@ -1,6 +1,7 @@
 package com.lotty.wishlysystemapi.service;
 
 import com.example.common.dto.ItemParseResponseDTO;
+import com.lotty.wishlysystemapi.dto.request.item.AddItemDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.request.item.UpdateItemDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
@@ -54,10 +55,26 @@ public class ItemService {
         Item item = itemMapper.toEntity(dto);
         item.setOwner(owner);
         Item savedItem = itemDAO.save(item);
-
         logger.info("Айтем успешно создан с ID: {}", savedItem.getItemId());
         return itemMapper.toItemCreateResponseDTO(savedItem);
     }
+
+    @Transactional
+    public ItemCreateResponseDTO createItemWithoutWishlist(AddItemDTO dto, String username) {
+        logger.info("Создание нового айтема для пользователя : {}", username);
+        User owner = userService.findUserByNameOrThrow(username);
+        checkItemAccess(owner, "создание айтема");
+        Item item = itemMapper.toEntity(dto);
+        item.setOwner(owner);
+        Item savedItem = itemDAO.save(item);
+        logger.info("Айтем успешно создан  с ID: {}", savedItem.getItemId());
+        return itemMapper.toItemCreateResponseDTO(savedItem);
+    }
+
+
+
+
+
 
     public Item createItemFromParsedData(ItemParseResponseDTO response) {
         logger.info("Создание item из распарсенных данных. Task id: {}", response.getTaskId());
