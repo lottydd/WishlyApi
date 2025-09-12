@@ -18,7 +18,6 @@ import java.util.List;
 public interface ItemMapper {
 
     @Mapping(target = "itemId", ignore = true)
-    @Mapping(target = "description", ignore = true)
     @Mapping(target = "inWishlists", ignore = true)
     @Mapping(target = "owner", ignore = true)
     Item toEntity(AddItemToWishlistDTO dto);

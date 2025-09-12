@@ -34,7 +34,7 @@ public class KafkaConsumerService {
             } else {
 
                 Item item = itemService.createItemFromParsedData(response);
-                wishlistService.addExistingItemToWishlist( response.getWishlistId(), item);
+                wishlistService.addItemToWishlist( response.getWishlistId(), item.getItemId());
                 parsingTaskService.markAsCompleted(response.getTaskId(), item.getItemId());
 
             }

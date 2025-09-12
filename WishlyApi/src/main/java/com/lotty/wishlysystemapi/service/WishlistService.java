@@ -5,9 +5,7 @@ import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistUpdateDTO;
 import com.lotty.wishlysystemapi.dto.request.item.AddItemToWishlistDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemCreateResponseDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistCreateResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistUpdateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.wishlist.*;
 import com.lotty.wishlysystemapi.exception.SecurityAuthenticationException;
 import com.lotty.wishlysystemapi.mapper.ItemMapper;
 import com.lotty.wishlysystemapi.mapper.WishlistMapper;
@@ -72,34 +70,22 @@ public class WishlistService {
     }
 
     @Transactional
-    public void addExistingItemToWishlist(Integer wishlistId, Item item) {
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
+    public WishlistUpdateResponseDTO addItemToWishlist(Integer wishlistId, Integer itemId) {
+        logger.info("Добавление айтема {} в вишлист {}", itemId, wishlistId);
 
-        if (!wishlist.getWishlistItems().contains(item)) {
-            wishlist.getWishlistItems().add(item);
-            wishlist.setModifiedDate(LocalDateTime.now());
-            wishlistDAO.save(wishlist);
-            logger.info("Айтем с ID {} успешно добавлен в вишлист {}", item.getItemId(), wishlistId);
-        } else {
+        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
+        checkWishlistAccess(wishlist);
+
+        Item item = itemService.findItemByIdOrThrow(itemId);
+
+        if (wishlist.getWishlistItems().contains(item)) {
             logger.warn("Попытка добавить айтем с ID {}, который уже существует в вишлисте {}", item.getItemId(), wishlistId);
             throw new IllegalArgumentException(
                     String.format("Айтем с ID %d уже содержится в вишлисте %d", item.getItemId(), wishlistId)
             );
         }
-    }
 
-
-    @Transactional
-    public WishlistUpdateResponseDTO addItemToWishlist(Integer wishlistId, Integer itemId) {
-        logger.info("Добавление айтема {} в вишлист {}", itemId, wishlistId);
-
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
-        checkWishlistAccess(wishlist); // Проверка прав на вишлист
-
-        Item item = itemService.findItemByIdOrThrow(itemId);
-        validateItemOwnership(item, wishlist.getUser()); // Айтем должен принадлежать владельцу вишлиста
-        validateItemNotInWishlist(wishlist, item); // Проверка дублирования
-
+        validateItemOwnership(item, wishlist.getUser());
         wishlist.getWishlistItems().add(item);
         wishlist.setModifiedDate(LocalDateTime.now());
 
@@ -121,29 +107,27 @@ public class WishlistService {
         return addItemToWishlist(wishlistId, itemResponse.getItemId());
     }
 
-
     @Transactional(readOnly = true)
     public List<WishlistResponseDTO> getUserWishlists(String username) {
         logger.info("Получение вишлистов пользователя: {}", username);
 
         User targetUser = userService.findUserByNameOrThrow(username);
-        checkUserWishlistsAccess(targetUser); // Проверка прав на просмотр вишлистов
-
-        List<WishlistResponseDTO> wishlists = wishlistMapper.toWishlistResponseDTOList(wishlistDAO.findAllByUserId(targetUser.getUserId()));
+        checkUserWishlistsAccess(targetUser);
+        List<Wishlist> wishlists = wishlistDAO.findAllByUserIdWithItems(targetUser.getUserId());
 
         if (wishlists.isEmpty()) {
             logger.warn("У пользователя ID {} нет вишлистов", username);
         } else {
             logger.info("Найдено {} вишлистов у пользователя ID {}", wishlists.size(), username);
         }
-        return wishlists;
+        return wishlistMapper.toWishlistResponseDTOList(wishlists);
     }
 
     @Transactional
     public WishlistUpdateResponseDTO updateWishlist(WishlistUpdateDTO dto) {
         logger.info("Обновление вишлиста ID: {}", dto.getWishlistId());
 
-        Wishlist wishlist = findWishlistByIdOrThrow(dto.getWishlistId());
+        Wishlist wishlist = findByIdWithItemsOrThrow(dto.getWishlistId());
         checkWishlistAccess(wishlist);
 
         wishlist.setWishlistName(dto.getWishlistName());
@@ -171,7 +155,7 @@ public class WishlistService {
     public WishlistUpdateResponseDTO removeItemFromWishlist(Integer wishlistId, Integer itemId) {
         logger.info("Удаление айтема {} из вишлиста {}", itemId, wishlistId);
 
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
+        Wishlist wishlist = findByIdWithItemsOrThrow(wishlistId);
         checkWishlistAccess(wishlist);
 
         Item item = itemService.findItemByIdOrThrow(itemId);
@@ -188,9 +172,8 @@ public class WishlistService {
     public List<ItemResponseDTO> getWishlistItems(Integer wishlistId) {
         logger.info("Получение айтемов для вишлиста ID: {}", wishlistId);
 
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
-        checkWishlistAccess(wishlist); // Проверка прав на вишлист
-
+        Wishlist wishlist = findByIdWithItemsOrThrow(wishlistId);
+        checkWishlistAccess(wishlist);
         List<ItemResponseDTO> items = itemMapper.toItemResponseDTOList(wishlist.getWishlistItems());
 
         if (items.isEmpty()) {
@@ -202,11 +185,11 @@ public class WishlistService {
     }
 
     @Transactional(readOnly = true)
-    public WishlistResponseDTO getWishlistPrivateInfoById(Integer wishlistId) {
+    public WishlistPrivateInfoDTO getWishlistPrivateInfoById(Integer wishlistId) {
         logger.info("Получение вишлиста ID: {}", wishlistId);
-        Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
+        Wishlist wishlist = findByIdWithItemsOrThrow(wishlistId);
         checkWishlistAccess(wishlist);
-        return wishlistMapper.toWishlistDTO(wishlist);
+        return wishlistMapper.toWishlistPrivateInfoDTO(wishlist);
     }
 
     @Transactional(readOnly = true)
@@ -214,6 +197,21 @@ public class WishlistService {
         logger.info("Получение вишлиста ID: {}", wishlistId);
         Wishlist wishlist = findWishlistByIdOrThrow(wishlistId);
         return wishlistMapper.toWishlistDTO(wishlist);
+    }
+
+    @Transactional(readOnly = true)
+    public WishlistWithItemsResponseDTO getWishlistInfoWithItemList(Integer wishlistId) {
+        logger.info("Получение вишлиста ID: {}", wishlistId);
+        Wishlist wishlist = findByIdWithItemsOrThrow(wishlistId);
+        return wishlistMapper.toWishlistWithItemsDTO(wishlist);
+    }
+
+    private Wishlist findByIdWithItemsOrThrow(Integer wishlistId) {
+        return wishlistDAO.findByIdWithItems(wishlistId)
+                .orElseThrow(() -> {
+                    logger.error("Вишлист с ID {} не найден", wishlistId);
+                    return new EntityNotFoundException("Вишлист не найден");
+                });
     }
 
 

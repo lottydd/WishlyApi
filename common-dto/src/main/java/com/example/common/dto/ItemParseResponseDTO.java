@@ -2,6 +2,7 @@
 package com.example.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,11 +27,11 @@ public class ItemParseResponseDTO {
     @Schema(description = "Источник вещи", example = "http://store.com/item/123")
     private String sourceURL;
 
-
+    @NotNull
     private Integer taskId;
 
     private String errorMessage;
-
+    @NotNull
     private Integer wishlistId;
 
 }

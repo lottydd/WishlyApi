@@ -25,13 +25,14 @@ import java.time.LocalDateTime;
 public class ParsingTaskService {
 
     private static final Logger logger = LoggerFactory.getLogger(ParsingTaskService.class);
-
+    private final UrlValidator urlValidator;
     private final ParsingTaskDAO parsingTaskDAO;
     private final KafkaProducerService kafkaProducerService;
     private final UserDAO userDAO;
     private final WishlistDAO wishlistDAO;
 
-    public ParsingTaskService( ParsingTaskDAO parsingTaskDAO, KafkaProducerService kafkaProducerService, UserDAO userDAO, WishlistDAO wishlistDAO) {
+    public ParsingTaskService(UrlValidator urlValidator, ParsingTaskDAO parsingTaskDAO, KafkaProducerService kafkaProducerService, UserDAO userDAO, WishlistDAO wishlistDAO) {
+        this.urlValidator = urlValidator;
         this.parsingTaskDAO = parsingTaskDAO;
         this.kafkaProducerService = kafkaProducerService;
         this.userDAO = userDAO;
@@ -40,9 +41,11 @@ public class ParsingTaskService {
 
     @Transactional
     public TaskResponseDTO createAndSendTask(ParseRequestDTO request) {
+
         logger.info("Попытка парса ссылки");
-        logger.info("Получен request: url={}, wishlistId={}, taskId={}",
-                request.getUrl(), request.getWishlistId(), request.getTaskId());
+        urlValidator.validateUrl(request.getUrl());
+        logger.info("Получен request: url={}, wishlistId={}",
+                request.getUrl(), request.getWishlistId());
 
         User currentUser = getAuthenticatedUser();
         Wishlist wishlist = validateAndGetWishlist(request.getWishlistId(), currentUser);

@@ -3,9 +3,7 @@ package com.lotty.wishlysystemapi.controller;
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistCreateDTO;
 import com.lotty.wishlysystemapi.dto.request.wishlist.WishlistUpdateDTO;
 import com.lotty.wishlysystemapi.dto.response.item.ItemResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistCreateResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistResponseDTO;
-import com.lotty.wishlysystemapi.dto.response.wishlist.WishlistUpdateResponseDTO;
+import com.lotty.wishlysystemapi.dto.response.wishlist.*;
 import com.lotty.wishlysystemapi.service.WishlistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,20 +41,42 @@ public class WishlistController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Получить вишлист по ID")
+    @Operation(summary = "Получить базовую о вишлисте по ID")
     @GetMapping("/{wishlistid}")
-    public ResponseEntity<WishlistResponseDTO> getWishlistById(@PathVariable Integer wishlistid) {
+    public ResponseEntity<WishlistResponseDTO> getWishlistInfoById(@PathVariable Integer wishlistid) {
         return ResponseEntity.ok(wishlistService.getWishlistInfo(wishlistid));
     }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Получить базовую о вишлисте и его список айтемов по ID")
+    @GetMapping("/{wishlistid}/items")
+    public ResponseEntity<WishlistWithItemsResponseDTO> getWishlistInfoWithItemListById(@PathVariable Integer wishlistid) {
+        return ResponseEntity.ok(wishlistService.getWishlistInfoWithItemList(wishlistid));
+    }
+
 
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Получить полную информацию о вишлисте по ID")
     @GetMapping("private-info/{wishlistid}")
-    public ResponseEntity<WishlistResponseDTO> getWishlistInfoById(@PathVariable Integer wishlistid) {
+    public ResponseEntity<WishlistPrivateInfoDTO> getWishlistPrivateInfoById(@PathVariable Integer wishlistid) {
         return ResponseEntity.ok(wishlistService.getWishlistPrivateInfoById(wishlistid));
     }
 
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Обновить информацию о вишлисте")
+    @PutMapping("/{wishlistid}")
+    public ResponseEntity<WishlistUpdateResponseDTO> updateWishlistData(@RequestBody WishlistUpdateDTO dto) {
+        return ResponseEntity.ok(wishlistService.updateWishlist(dto));
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Добавить существующий айтем в вишлист")
+    @PostMapping("/existed-item/{wishlistid}/{itemid}")
+    public ResponseEntity<WishlistUpdateResponseDTO> addItemToWishlist(@RequestParam Integer wishlistid, Integer itemid ) {
+        return ResponseEntity.ok(wishlistService.addItemToWishlist(wishlistid, itemid));
+    }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Получить айтемы из вишлиста по ID")
@@ -73,12 +93,11 @@ public class WishlistController {
         return ResponseEntity.ok(wishlistService.removeItemFromWishlist(wishlistid, itemid));
     }
 
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Обновить вишлист")
-    @PutMapping("/{wishlistid}")
-    public ResponseEntity<WishlistUpdateResponseDTO> updateWishlistData(@RequestBody WishlistUpdateDTO dto) {
-        return ResponseEntity.ok(wishlistService.updateWishlist(dto));
+    @Operation(summary = "Создать и добавить айтем в вишлист")
+    @PostMapping("/new-item/{wishlistid}/{itemid}")
+    public ResponseEntity<WishlistUpdateResponseDTO> createAndAddItemToWishlist(@RequestParam Integer wishlistid, Integer itemid ) {
+        return ResponseEntity.ok(wishlistService.addItemToWishlist(wishlistid, itemid));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
